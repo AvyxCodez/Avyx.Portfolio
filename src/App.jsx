@@ -263,7 +263,7 @@ function App() {
     }
     (async () => {
       try {
-        const res = await fetch(`${COUNTER_URL}/get/${COUNTER_NS}/${COUNTER_ID}`);
+        const res = await fetch(`/api/counter?action=get`);
         const data = await res.json();
         if (typeof data.value === "number") setViews(data.value);
       } catch {}
@@ -279,7 +279,7 @@ function App() {
     }
     (async () => {
       try {
-        const res = await fetch(`${COUNTER_URL}/hit/${COUNTER_NS}/${COUNTER_ID}`);
+        const res = await fetch(`/api/counter?action=hit`);
         const data = await res.json();
         if (typeof data.value === "number") setViews(data.value);
       } catch {}
