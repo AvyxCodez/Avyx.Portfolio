@@ -436,6 +436,21 @@ function App() {
   const isScrollingRef = useRef(false);
   const TOTAL_SECTIONS = 4;
 
+  // Force section heights to match window.innerHeight exactly (fixes iOS Safari 100vh vs dvh mismatch)
+  useEffect(() => {
+    const setSectionHeights = () => {
+      const h = window.innerHeight;
+      document.querySelectorAll('.snap-section').forEach(el => {
+        el.style.height = `${h}px`;
+        el.style.minHeight = `${h}px`;
+      });
+      if (snapContainerRef.current) snapContainerRef.current.style.height = `${h}px`;
+    };
+    setSectionHeights();
+    window.addEventListener('resize', setSectionHeights);
+    return () => window.removeEventListener('resize', setSectionHeights);
+  }, []);
+
   const smoothScrollTo = (container, targetY, duration = 900) => {
     const startY = container.scrollTop;
     const diff = targetY - startY;
