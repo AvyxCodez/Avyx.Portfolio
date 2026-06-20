@@ -265,7 +265,8 @@ function App() {
       try {
         const res = await fetch(`/api/counter?action=get`);
         const data = await res.json();
-        if (typeof data.value === "number") setViews(data.value);
+        const v = data.count ?? data.value;
+        if (typeof v === "number") setViews(v);
       } catch {}
     })();
   }, []);
@@ -281,7 +282,8 @@ function App() {
       try {
         const res = await fetch(`/api/counter?action=hit`);
         const data = await res.json();
-        if (typeof data.value === "number") setViews(data.value);
+        const v = data.count ?? data.value;
+        if (typeof v === "number") setViews(v);
       } catch {}
     })();
   };
