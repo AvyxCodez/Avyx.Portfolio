@@ -118,25 +118,149 @@ function DiscordBadgeIcon({ icon }) {
   );
 }
 
+const SITE_CONFIG = {
+  username: "Avyx",
+  displayName: "A V Y X",
+  bio: "Developer & programmer. Working at Amazon Robotics.",
+  pfp: "https://media.discordapp.net/attachments/1233881503923179572/1514388105564651590/IMG_3924.jpg?ex=6a2d2994&is=6a2bd814&hm=e33de4bcd7e93bfbd740b2e07a82fd9ca6d8aaa45b971750a7c37b0d71663163&=&format=webp&width=544&height=544",
+  bgType: "image",
+  bgValue: "https://files.catbox.moe/xotlnd.jpg",
+  audioLoop: true,
+};
+
+const DISCORD_USER_ID = "825785012468056155";
+
+const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+const fadeTexts = ["Welcome", "Developer", "WebDev", "Scroll for more!"];
+
+const songs = [
+  {
+    id: 1,
+    title: "DON'T YOU LIE",
+    artist: "Offset",
+    url: "https://files.catbox.moe/ygafnn.mp3",
+    albumArt: "https://files.catbox.moe/vbosn0.png",
+  },
+  {
+    id: 2,
+    title: "Enemies",
+    artist: "Offset",
+    url: "https://files.catbox.moe/rot9gk.mp3",
+    albumArt: "https://files.catbox.moe/kmrfil.png",
+  },
+];
+
+const skills = [
+  { name: 'Python',       pct: 85 },
+  { name: 'JavaScript',   pct: 90 },
+  { name: 'TypeScript',   pct: 78 },
+  { name: 'React',        pct: 88 },
+  { name: 'Tailwind CSS', pct: 92 },
+  { name: 'Node.js',      pct: 72 },
+];
+
+const gameLibrary = [
+  {
+    id: 1,
+    title: "007 First Light",
+    platform: "Steam",
+    status: "Playing",
+    year: "2026",
+    genre: "Action, Adventure",
+    description: "A brand new James Bond experience with intense action and cinematic storytelling.",
+    cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/dbe86ebd2edb4c77d113e9e2feefeb90189fabc9/header.jpg?t=1780990824",
+    steamUrl: "https://store.steampowered.com/app/3768760/007_First_Light/"
+  },
+  {
+    id: 2,
+    title: "Alan Wake 2",
+    platform: "Epic Games",
+    status: "Completed",
+    year: "2023",
+    genre: "Survival Horror, Action",
+    description: "A psychological horror game where light is your only weapon against the darkness.",
+    cover: "https://www.alanwake.com/wp-content/uploads/2023/05/aw2-standard-800x404.png",
+    steamUrl: "https://www.alanwake.com/buy-now-alan-wake-2/#/search&platform=epic-games-store&retail_type=digital"
+  },
+  {
+    id: 3,
+    title: "Crimson Desert",
+    platform: "Steam",
+    status: "Playing",
+    year: "2025",
+    genre: "Action, Open World",
+    description: "An open-world action RPG set in a vast and beautiful fantasy world.",
+    cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/abd7dbdeaede8b6c9a6d40bf116ff2b883f2dd45/header.jpg?t=1777016399",
+    steamUrl: "https://store.steampowered.com/app/3321460/Crimson_Desert/"
+  },
+  {
+    id: 4,
+    title: "Forza Horizon 6",
+    platform: "Steam",
+    status: "Playing",
+    year: "2025",
+    genre: "Racing, Open World",
+    description: "The ultimate open-world racing experience with stunning graphics and hundreds of cars.",
+    cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2483190/27abb1584a118d50d0e3950fd48d557c51981db7/header.jpg?t=1781040370",
+    steamUrl: "https://store.steampowered.com/app/2483190/Forza_Horizon_6/"
+  },
+  {
+    id: 5,
+    title: "Mafia: The Old Country",
+    platform: "Steam",
+    status: "Completed",
+    year: "2025",
+    genre: "Action, Adventure",
+    description: "A gritty crime story set in the brutal world of organized crime in early 1900s America.",
+    cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1941540/extras/20d9f0060dff8c8613b938f736375f97.avif?t=1780699604",
+    steamUrl: "https://store.steampowered.com/app/1941540/Mafia_The_Old_Country/"
+  },
+  {
+    id: 6,
+    title: "Undisputed",
+    platform: "Steam",
+    status: "Completed",
+    year: "2024",
+    genre: "Sports, Simulation",
+    description: "The most authentic boxing simulation game ever made with realistic gameplay.",
+    cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1451190/header.jpg?t=1766067946",
+    steamUrl: "https://store.steampowered.com/app/1451190/Undisputed/"
+  }
+];
+
+const BADGE_FLAGS = [
+  { flag: 1,       icon: 'discord-staff',            label: 'Discord Staff' },
+  { flag: 2,       icon: 'partnered-server-owner',   label: 'Partnered Server Owner' },
+  { flag: 4,       icon: 'hypesquad-events',         label: 'HypeSquad Events' },
+  { flag: 8,       icon: 'bug-hunter',               label: 'Bug Hunter' },
+  { flag: 64,      icon: 'hypesquad-bravery',        label: 'HypeSquad Bravery' },
+  { flag: 128,     icon: 'hypesquad-brilliance',     label: 'HypeSquad Brilliance' },
+  { flag: 256,     icon: 'hypesquad-balance',        label: 'HypeSquad Balance' },
+  { flag: 512,     icon: 'early-supporter',          label: 'Early Supporter' },
+  { flag: 16384,   icon: 'bug-hunter-gold',          label: 'Bug Hunter Level 2' },
+  { flag: 131072,  icon: 'early-verified-developer', label: 'Early Verified Developer' },
+  { flag: 262144,  icon: 'certified-moderator',      label: 'Certified Moderator' },
+  { flag: 4194304, icon: 'active-developer',         label: 'Active Developer' },
+];
+
+const formatClock = (date) => date.toLocaleTimeString('en-US', {
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+});
+
+const formatTime = (t) => {
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+};
+
+const getStatusColor = (s) => s === "Playing"
+  ? "bg-emerald-500/90 text-white"
+  : s === "Completed"
+  ? "bg-blue-500/90 text-white"
+  : "bg-purple-500/90 text-white";
+
 function App() {
-  const [state, setState] = useState({
-    username: "Avyx",
-    displayName: "A V Y X",
-    bio: "Developer & programmer. Working at Amazon Robotics.",
-    pfp: "https://media.discordapp.net/attachments/1233881503923179572/1514388105564651590/IMG_3924.jpg?ex=6a2d2994&is=6a2bd814&hm=e33de4bcd7e93bfbd740b2e07a82fd9ca6d8aaa45b971750a7c37b0d71663163&=&format=webp&width=544&height=544",
-    socials: {
-      discord: "",
-      x: "",
-      email: "",
-      telegram: ""
-    },
-    links: [],
-    bgType: "image",
-    bgValue: "https://files.catbox.moe/xotlnd.jpg",
-    audioUrl: "",
-    audioLoop: true,
-    videoHasSound: false,
-  });
 
   const [showEnter, setShowEnter] = useState(true);
   const [showGameLibrary, setShowGameLibrary] = useState(false);
@@ -167,14 +291,6 @@ function App() {
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0 });
   };
-
-  // Fade Cycle Texts
-  const fadeTexts = [
-    "Welcome",
-    "Developer",
-    "WebDev",
-    "Scroll for more!"
-  ];
 
   const [currentFadeIndex, setCurrentFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
@@ -218,10 +334,6 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const formatClock = (date) => date.toLocaleTimeString('en-US', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-  });
-
   // Album Color
   const [albumColor, setAlbumColor] = useState("#1a1a1a");
   const extractDominantColor = (imageUrl) => {
@@ -248,11 +360,6 @@ function App() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
-  const COUNTER_URL = "https://api.counterapi.dev";
-  const COUNTER_NS  = "avyx-bio";
-  const COUNTER_ID  = "views";
-  const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
   const [views, setViews] = useState(null);
   const [displayViews, setDisplayViews] = useState(0);
@@ -314,7 +421,7 @@ function App() {
   const [displayedBio, setDisplayedBio] = useState("");
   const [isDeletingBio, setIsDeletingBio] = useState(false);
   const [startTyping, setStartTyping] = useState(false);
-  const fullBio = state.bio;
+  const fullBio = SITE_CONFIG.bio;
 
   const enterSite = () => {
     setShowEnter(false);
@@ -341,24 +448,6 @@ function App() {
     const t = setTimeout(handle, isDeletingBio ? 90 : 170);
     return () => clearTimeout(t);
   }, [displayedBio, isDeletingBio, startTyping]);
-
-  // Songs
-  const songs = [
-    {
-      id: 1,
-      title: "DON'T YOU LIE",
-      artist: "Offset",
-      url: "https://files.catbox.moe/ygafnn.mp3",
-      albumArt: "https://files.catbox.moe/vbosn0.png",
-    },
-    {
-      id: 2,
-      title: "Enemies",
-      artist: "Offset",
-      url: "https://files.catbox.moe/rot9gk.mp3",
-      albumArt: "https://files.catbox.moe/kmrfil.png",
-    },
-  ];
 
   const [currentSong, setCurrentSong] = useState(songs[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -573,12 +662,6 @@ function App() {
 
   const handleVolumeChange = (e) => setVolume(parseFloat(e.target.value));
 
-  const formatTime = (t) => {
-    const m = Math.floor(t / 60);
-    const s = Math.floor(t % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
   const selectSong = (song) => setCurrentSong(song);
 
   const nextSong = () => {
@@ -599,35 +682,9 @@ function App() {
     }, 80);
   };
 
-  const DISCORD_USER_ID = "825785012468056155";
-
-  const skills = [
-    { name: 'Python',      pct: 85 },
-    { name: 'JavaScript',  pct: 90 },
-    { name: 'TypeScript',  pct: 78 },
-    { name: 'React',       pct: 88 },
-    { name: 'Tailwind CSS',pct: 92 },
-    { name: 'Node.js',     pct: 72 },
-  ];
-
   const [discordAvatar, setDiscordAvatar] = useState(null);
   const [discordStatus, setDiscordStatus] = useState('offline');
   const [discordBadges, setDiscordBadges] = useState([]);
-
-  const BADGE_FLAGS = [
-    { flag: 1,       icon: 'discord-staff',            label: 'Discord Staff' },
-    { flag: 2,       icon: 'partnered-server-owner',   label: 'Partnered Server Owner' },
-    { flag: 4,       icon: 'hypesquad-events',         label: 'HypeSquad Events' },
-    { flag: 8,       icon: 'bug-hunter',               label: 'Bug Hunter' },
-    { flag: 64,      icon: 'hypesquad-bravery',        label: 'HypeSquad Bravery' },
-    { flag: 128,     icon: 'hypesquad-brilliance',     label: 'HypeSquad Brilliance' },
-    { flag: 256,     icon: 'hypesquad-balance',        label: 'HypeSquad Balance' },
-    { flag: 512,     icon: 'early-supporter',          label: 'Early Supporter' },
-    { flag: 16384,   icon: 'bug-hunter-gold',          label: 'Bug Hunter Level 2' },
-    { flag: 131072,  icon: 'early-verified-developer', label: 'Early Verified Developer' },
-    { flag: 262144,  icon: 'certified-moderator',      label: 'Certified Moderator' },
-    { flag: 4194304, icon: 'active-developer',         label: 'Active Developer' },
-  ];
 
   useEffect(() => {
     (async () => {
@@ -650,78 +707,6 @@ function App() {
     })();
   }, []);
 
-
-  const getStatusColor = (s) => s === "Playing" ? "bg-emerald-500/90 text-white" : s === "Completed" ? "bg-blue-500/90 text-white" : "bg-purple-500/90 text-white";
-
-  // ==================== GAME LIBRARY ====================
-  const gameLibrary = [
-    {
-      id: 1,
-      title: "007 First Light",
-      platform: "Steam",
-      status: "Playing",
-      year: "2026",
-      genre: "Action, Adventure",
-      description: "A brand new James Bond experience with intense action and cinematic storytelling.",
-      cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/dbe86ebd2edb4c77d113e9e2feefeb90189fabc9/header.jpg?t=1780990824",
-      steamUrl: "https://store.steampowered.com/app/3768760/007_First_Light/"
-    },
-    {
-      id: 2,
-      title: "Alan Wake 2",
-      platform: "Epic Games",
-      status: "Completed",
-      year: "2023",
-      genre: "Survival Horror, Action",
-      description: "A psychological horror game where light is your only weapon against the darkness.",
-      cover: "https://www.alanwake.com/wp-content/uploads/2023/05/aw2-standard-800x404.png",
-      steamUrl: "https://www.alanwake.com/buy-now-alan-wake-2/#/search&platform=epic-games-store&retail_type=digital"
-    },
-    {
-      id: 3,
-      title: "Crimson Desert",
-      platform: "Steam",
-      status: "Playing",
-      year: "2025",
-      genre: "Action, Open World",
-      description: "An open-world action RPG set in a vast and beautiful fantasy world.",
-      cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/abd7dbdeaede8b6c9a6d40bf116ff2b883f2dd45/header.jpg?t=1777016399",
-      steamUrl: "https://store.steampowered.com/app/3321460/Crimson_Desert/"
-    },
-    {
-      id: 4,
-      title: "Forza Horizon 6",
-      platform: "Steam",
-      status: "Playing",
-      year: "2025",
-      genre: "Racing, Open World",
-      description: "The ultimate open-world racing experience with stunning graphics and hundreds of cars.",
-      cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2483190/27abb1584a118d50d0e3950fd48d557c51981db7/header.jpg?t=1781040370",
-      steamUrl: "https://store.steampowered.com/app/2483190/Forza_Horizon_6/"
-    },
-    {
-      id: 5,
-      title: "Mafia: The Old Country",
-      platform: "Steam",
-      status: "Completed",
-      year: "2025",
-      genre: "Action, Adventure",
-      description: "A gritty crime story set in the brutal world of organized crime in early 1900s America.",
-      cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1941540/extras/20d9f0060dff8c8613b938f736375f97.avif?t=1780699604",
-      steamUrl: "https://store.steampowered.com/app/1941540/Mafia_The_Old_Country/"
-    },
-    {
-      id: 6,
-      title: "Undisputed",
-      platform: "Steam",
-      status: "Completed",
-      year: "2024",
-      genre: "Sports, Simulation",
-      description: "The most authentic boxing simulation game ever made with realistic gameplay.",
-      cover: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1451190/header.jpg?t=1766067946",
-      steamUrl: "https://store.steampowered.com/app/1451190/Undisputed/"
-    }
-  ];
 
   const [currentGameIndex, setCurrentGameIndex] = useState(0);
   const currentGame = gameLibrary[currentGameIndex];
@@ -771,8 +756,6 @@ function App() {
       
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
         html, body, .snap-container {
           cursor: none !important;
         }
@@ -825,11 +808,11 @@ function App() {
 
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        {state.bgType === 'video' && (
-          <video ref={videoRef} src={state.bgValue} loop muted playsInline className="fixed inset-0 w-full h-full object-cover" />
+        {SITE_CONFIG.bgType === 'video' && (
+          <video ref={videoRef} src={SITE_CONFIG.bgValue} loop muted playsInline className="fixed inset-0 w-full h-full object-cover" />
         )}
-        {(state.bgType === 'gif' || state.bgType === 'image') && (
-          <img src={state.bgValue} alt="Background" className="fixed inset-0 w-full h-full object-cover" />
+        {(SITE_CONFIG.bgType === 'gif' || SITE_CONFIG.bgType === 'image') && (
+          <img src={SITE_CONFIG.bgValue} alt="Background" className="fixed inset-0 w-full h-full object-cover" />
         )}
       </div>
 
@@ -977,7 +960,7 @@ function App() {
                     <div className="relative w-[108px] h-[108px] rounded-full p-[2.5px]"
                       style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05))' }}>
                       <div className="w-full h-full rounded-full overflow-hidden">
-                        <img src={discordAvatar || state.pfp} className="w-full h-full object-cover" alt="Profile" />
+                        <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
                       </div>
                     </div>
                     {/* Status dot */}
@@ -993,7 +976,7 @@ function App() {
                 {/* Name */}
                 <h1 className="text-center text-[2.1rem] font-bold tracking-tight mb-3"
                   style={{ background: 'linear-gradient(160deg,#fff 30%,rgba(255,255,255,0.55))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  {state.username}
+                  {SITE_CONFIG.username}
                 </h1>
 
                 {/* Discord badges */}
@@ -1485,7 +1468,7 @@ function App() {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={nextSong} loop={state.audioLoop} />
+      <audio ref={audioRef} onEnded={nextSong} loop={SITE_CONFIG.audioLoop} />
 
       {/* GAME LIBRARY MODAL */}
       <AnimatePresence>
