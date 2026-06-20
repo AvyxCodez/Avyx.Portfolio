@@ -258,17 +258,17 @@ function App() {
   const [displayViews, setDisplayViews] = useState(0);
 
   useEffect(() => {
-    if (views === null) return;
-    const start = 0, end = views, dur = 1200;
+    if (views === null || showEnter) return;
+    const end = views, dur = 1200;
     const t0 = performance.now();
     const step = (now) => {
       const p = Math.min((now - t0) / dur, 1);
       const ease = 1 - Math.pow(1 - p, 3);
-      setDisplayViews(Math.floor(ease * (end - start) + start));
+      setDisplayViews(Math.floor(ease * end));
       if (p < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
-  }, [views]);
+  }, [views, showEnter]);
 
   // On mount: read current count without incrementing
   useEffect(() => {
