@@ -4,14 +4,18 @@ import { supabase } from '../lib/supabase';
 
 const formatDate = (ts) => {
   const d = new Date(ts);
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 };
 
-const avatarColor = (name) => {
-  const colors = ['#5865F2','#ed4245','#3ba55d','#faa61a','#eb459e','#9b59b6','#e67e22','#1abc9c'];
+const gradientAvatar = (name) => {
+  const pairs = [
+    ['#6366f1','#8b5cf6'], ['#ec4899','#f43f5e'], ['#10b981','#06b6d4'],
+    ['#f59e0b','#ef4444'], ['#3b82f6','#6366f1'], ['#8b5cf6','#ec4899'],
+    ['#06b6d4','#10b981'], ['#f97316','#f59e0b'],
+  ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
+  return pairs[Math.abs(hash) % pairs.length];
 };
 
 const useIsMobile = () => {
@@ -41,10 +45,7 @@ export default function Comments() {
   useEffect(() => {
     if (!open || !supabase) return;
     setLoading(true);
-    supabase
-      .from('comments')
-      .select('*')
-      .order('created_at', { ascending: false })
+    supabase.from('comments').select('*').order('created_at', { ascending: false })
       .then(({ data }) => { setComments(data || []); setLoading(false); });
   }, [open]);
 
@@ -62,44 +63,61 @@ export default function Comments() {
     setMessage(''); setName(''); setShowForm(false);
   };
 
-  const panelContent = (
-    <div className={`bg-[#111111] border-white/[0.08] shadow-2xl overflow-hidden ${
-      isMobile
-        ? 'w-full rounded-t-2xl border-t border-x'
-        : 'w-full max-w-lg rounded-2xl border'
-    }`}>
-      {/* Drag handle (mobile only) */}
+  const Panel = (
+    <div className={`relative overflow-hidden ${isMobile ? 'rounded-t-[2rem]' : 'rounded-2xl'}`}
+      style={{ background: 'rgba(8,8,12,0.97)', border: '1px solid rgba(255,255,255,0.07)' }}>
+
+      {/* Top accent gradient bar */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, #6366f1 30%, #8b5cf6 70%, transparent)' }} />
+
+      {/* Subtle background glow */}
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-10 blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }} />
+
+      {/* Drag handle — mobile only */}
       {isMobile && (
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
+        <div className="flex justify-center pt-4 pb-2">
+          <div className="w-9 h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-4">
-        <div className="flex items-center gap-2">
-          <i className="fa-regular fa-comment text-indigo-400 text-base" />
-          <span className="text-base font-semibold text-white">Comments</span>
+      <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 16px rgba(99,102,241,0.4)' }}>
+            <i className="fa-regular fa-comment text-white text-xs" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white leading-none">Comments</p>
+            <p className="text-[10px] font-mono mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {comments.length} {comments.length === 1 ? 'note' : 'notes'}
+            </p>
+          </div>
         </div>
+
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setNewest(n => !n)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium transition-all"
-          >
-            <i className="fa-solid fa-arrow-up-short-wide text-[9px]" />
-            {newest ? 'Newest first' : 'Oldest first'}
+          {/* Sort toggle */}
+          <button onClick={() => setNewest(n => !n)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all"
+            style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <i className={`fa-solid text-[8px] ${newest ? 'fa-arrow-down-wide-short' : 'fa-arrow-up-wide-short'}`} />
+            {newest ? 'Newest' : 'Oldest'}
           </button>
-          <button
-            onClick={() => { setShowForm(f => !f); setError(''); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold transition-all"
-          >
-            <i className="fa-solid fa-plus text-[9px]" />
-            New Comment
+
+          {/* New comment */}
+          <button onClick={() => { setShowForm(f => !f); setError(''); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: showForm ? '0 0 16px rgba(99,102,241,0.4)' : 'none' }}>
+            <i className={`fa-solid text-[9px] transition-transform duration-200 ${showForm ? 'fa-xmark' : 'fa-plus'}`} />
+            {showForm ? 'Cancel' : 'Leave a note'}
           </button>
-          <button
-            onClick={() => setOpen(false)}
-            className="w-7 h-7 flex items-center justify-center text-white/30 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-          >
+
+          {/* Close */}
+          <button onClick={() => setOpen(false)}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:bg-white/10"
+            style={{ color: 'rgba(255,255,255,0.25)' }}>
             <i className="fa-solid fa-xmark text-sm" />
           </button>
         </div>
@@ -108,36 +126,35 @@ export default function Comments() {
       {/* Form */}
       <AnimatePresence>
         {showForm && (
-          <motion.form
-            onSubmit={submit}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t border-white/[0.06]"
-          >
-            <div className="px-5 py-4 flex flex-col gap-2.5">
-              <input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Your name"
-                maxLength={32}
-                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-indigo-500/50 transition-colors"
+          <motion.form onSubmit={submit}
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }}
+            className="overflow-hidden"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="px-5 py-4 flex flex-col gap-3">
+              <input value={name} onChange={e => setName(e.target.value)}
+                placeholder="Your name" maxLength={32}
+                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#6366f1' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
               />
-              <textarea
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder="Say something..."
-                maxLength={200}
-                rows={3}
-                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-indigo-500/50 transition-colors resize-none"
+              <textarea value={message} onChange={e => setMessage(e.target.value)}
+                placeholder="Say something..." maxLength={200} rows={3}
+                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all resize-none"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#6366f1' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
               />
               {error && <p className="text-red-400 text-xs">{error}</p>}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/20 font-mono">{message.length}/200</span>
+                <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  {message.length}<span style={{ color: 'rgba(255,255,255,0.1)' }}>/200</span>
+                </span>
                 <button type="submit" disabled={submitting}
-                  className="px-4 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-white text-xs font-semibold transition-all">
-                  {submitting ? 'Posting…' : 'Post'}
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  {submitting ? 'Posting…' : 'Post →'}
                 </button>
               </div>
             </div>
@@ -145,93 +162,100 @@ export default function Comments() {
         )}
       </AnimatePresence>
 
+      {/* Divider */}
+      <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+
       {/* Comment list */}
-      <div className="border-t border-white/[0.06] overflow-y-auto" style={{ maxHeight: isMobile ? '55vh' : '24rem', scrollbarWidth: 'none' }}>
+      <div className="overflow-y-auto" style={{ maxHeight: isMobile ? '52vh' : '22rem', scrollbarWidth: 'none' }}>
         {loading ? (
-          <p className="text-center text-white/25 text-xs py-10">Loading…</p>
+          <div className="flex items-center justify-center py-12 gap-2">
+            <div className="w-1 h-1 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-1 h-1 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-1 h-1 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
         ) : comments.length === 0 ? (
-          <p className="text-center text-white/25 text-xs py-10">No comments yet — be the first!</p>
-        ) : (
-          sorted.map((c) => (
-            <div key={c.id} className="flex gap-3.5 px-5 py-4 border-b border-white/[0.05] last:border-0 hover:bg-white/[0.02] transition-colors">
-              <div
-                className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm font-bold uppercase"
-                style={{ backgroundColor: avatarColor(c.name) }}
-              >
-                {c.name[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sm font-semibold text-white truncate">{c.name}</span>
-                  <span className="text-[11px] text-white/30 flex-shrink-0">{formatDate(c.created_at)}</span>
-                </div>
-                <div className="flex items-end justify-between gap-2">
-                  <p className="text-sm text-white/55 leading-relaxed break-words flex-1">{c.message}</p>
-                  <div className="flex items-center gap-1 text-white/25 flex-shrink-0">
-                    <i className="fa-regular fa-heart text-xs text-red-400/60" />
-                    <span className="text-[11px]">0</span>
-                  </div>
-                </div>
-              </div>
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-1"
+              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
+              <i className="fa-regular fa-comment text-indigo-400 text-sm" />
             </div>
-          ))
+            <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>No notes yet</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>Be the first to leave one</p>
+          </div>
+        ) : (
+          sorted.map((c, idx) => {
+            const [from, to] = gradientAvatar(c.name);
+            return (
+              <motion.div key={c.id}
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.04, duration: 0.2 }}
+                className="group flex gap-3.5 px-5 py-4 transition-all cursor-default"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                {/* Gradient avatar */}
+                <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-xs font-bold uppercase"
+                  style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 4px 12px ${from}40` }}>
+                  {c.name[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-sm font-semibold text-white truncate">{c.name}</span>
+                    <span className="text-[10px] font-mono flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      {formatDate(c.created_at)}
+                    </span>
+                  </div>
+                  <p className="text-[13px] leading-relaxed break-words" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {c.message}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })
         )}
       </div>
+
+      {/* Bottom safe area — mobile */}
+      {isMobile && <div className="h-6" />}
     </div>
   );
 
   return (
     <>
-      {/* Trigger button */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/15 transition-all duration-200"
-      >
+      {/* Trigger */}
+      <button onClick={() => setOpen(o => !o)}
+        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200"
+        style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', color: open ? '#fff' : 'rgba(255,255,255,0.6)' }}>
         <i className="fa-regular fa-comment text-sm" />
       </button>
 
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <motion.div key="bd"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
-            />
+              className="fixed inset-0 z-[90]"
+              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} />
 
             {isMobile ? (
-              /* Bottom sheet with drag-to-dismiss */
-              <motion.div
-                key="sheet"
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                drag="y"
-                dragConstraints={{ top: 0 }}
-                dragElastic={{ top: 0, bottom: 0.4 }}
+              <motion.div key="sheet"
+                initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+                drag="y" dragConstraints={{ top: 0 }} dragElastic={{ top: 0, bottom: 0.4 }}
                 onDragEnd={(_, info) => { if (info.offset.y > 80) setOpen(false); }}
-                className="fixed bottom-0 left-0 right-0 z-[91] pointer-events-auto"
-              >
-                {panelContent}
+                className="fixed bottom-0 left-0 right-0 z-[91] pointer-events-auto">
+                {Panel}
               </motion.div>
             ) : (
-              /* Centered modal */
-              <motion.div
-                key="modal"
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-                className="fixed inset-0 z-[91] flex items-center justify-center p-4 pointer-events-none"
-              >
+              <motion.div key="modal"
+                initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="fixed inset-0 z-[91] flex items-center justify-center p-4 pointer-events-none">
                 <div className="pointer-events-auto w-full max-w-lg">
-                  {panelContent}
+                  {Panel}
                 </div>
               </motion.div>
             )}
