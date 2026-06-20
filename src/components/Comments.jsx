@@ -224,9 +224,9 @@ export default function Comments() {
     <>
       {/* Trigger */}
       <button onClick={() => setOpen(o => !o)}
-        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110"
+        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-125"
         style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
-        <i className="fa-regular fa-comment text-sm" />
+        <i className="fa-regular fa-comment text-xl" />
       </button>
 
       <AnimatePresence>
