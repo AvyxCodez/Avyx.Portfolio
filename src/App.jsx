@@ -255,6 +255,20 @@ function App() {
   const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
   const [views, setViews] = useState(null);
+  const [displayViews, setDisplayViews] = useState(0);
+
+  useEffect(() => {
+    if (views === null) return;
+    const start = 0, end = views, dur = 1200;
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min((now - t0) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      setDisplayViews(Math.floor(ease * (end - start) + start));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [views]);
 
   // On mount: read current count without incrementing
   useEffect(() => {
@@ -866,9 +880,12 @@ function App() {
 
       {/* VIEW COUNTER + LOCATION */}
       <div className={`fixed bottom-4 left-4 z-[70] flex items-center gap-2.5 text-sm text-white/80 transition-all duration-300 ${activeSection === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <div className="flex items-center gap-1.5">
+        <div className="group relative flex items-center gap-1.5 cursor-default">
           <i className="fa-solid fa-eye text-xs"></i>
-          <span>{views === null ? "—" : views.toLocaleString()} views</span>
+          <span className="font-mono tabular-nums">{views === null ? "—" : displayViews.toLocaleString()}</span>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-0.5 rounded-md text-xs text-white bg-black/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+            Views
+          </div>
         </div>
         
         <span className="text-white/40">•</span>
