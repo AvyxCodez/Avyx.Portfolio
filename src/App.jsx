@@ -601,6 +601,15 @@ function App() {
 
   const DISCORD_USER_ID = "825785012468056155";
 
+  const skills = [
+    { name: 'Python',      pct: 85 },
+    { name: 'JavaScript',  pct: 90 },
+    { name: 'TypeScript',  pct: 78 },
+    { name: 'React',       pct: 88 },
+    { name: 'Tailwind CSS',pct: 92 },
+    { name: 'Node.js',     pct: 72 },
+  ];
+
   const [discordAvatar, setDiscordAvatar] = useState(null);
   const [discordStatus, setDiscordStatus] = useState('offline');
   const [discordBadges, setDiscordBadges] = useState([]);
@@ -1092,9 +1101,23 @@ function App() {
                 <p className="text-white/60 text-[13px] leading-relaxed mb-3">
                   Developer &amp; programmer based in <span className="text-white/85 font-medium">Denver, CO</span>. Working at <span className="text-white/85 font-medium">Amazon Robotics</span>. Open to opportunities.
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {['Python', 'JS', 'TypeScript', 'React', 'Tailwind', 'Node.js'].map(tech => (
-                    <span key={tech} className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/[0.08] text-white/45">{tech}</span>
+                <div className="flex flex-col gap-2 mt-1">
+                  {skills.map((skill, i) => (
+                    <div key={skill.name}>
+                      <div className="flex justify-between mb-1">
+                        <span className="font-mono text-[10px] text-white/45">{skill.name}</span>
+                        <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
+                      </div>
+                      <div className="h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div className="h-full rounded-full transition-all ease-out"
+                          style={{
+                            width: aboutVisible ? `${skill.pct}%` : '0%',
+                            transitionDuration: '900ms',
+                            transitionDelay: `${i * 80 + 150}ms`,
+                            background: 'linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.2))',
+                          }} />
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1152,9 +1175,23 @@ function App() {
                   <p className="text-white/65 text-[15px] leading-relaxed mb-4">
                     Hi, Avy here — developer &amp; programmer based in <span className="text-white/90 font-medium">Denver, CO</span>. Currently working at <span className="text-white/90 font-medium">Amazon Robotics</span>. Open to new opportunities.
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Python', 'JavaScript', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js'].map(tech => (
-                      <span key={tech} className="font-mono text-[10px] px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white/85 hover:bg-white/[0.09] transition-all duration-150 cursor-default">{tech}</span>
+                  <div className="flex flex-col gap-2.5 mt-1">
+                    {skills.map((skill, i) => (
+                      <div key={skill.name}>
+                        <div className="flex justify-between mb-1">
+                          <span className="font-mono text-[10px] text-white/50">{skill.name}</span>
+                          <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
+                        </div>
+                        <div className="h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                          <div className="h-full rounded-full transition-all ease-out"
+                            style={{
+                              width: aboutVisible ? `${skill.pct}%` : '0%',
+                              transitionDuration: '900ms',
+                              transitionDelay: `${i * 80 + 200}ms`,
+                              background: 'linear-gradient(90deg, rgba(255,255,255,0.75), rgba(255,255,255,0.2))',
+                            }} />
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
