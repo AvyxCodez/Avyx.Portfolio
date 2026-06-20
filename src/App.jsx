@@ -814,9 +814,9 @@ function App() {
       {/* Particles */}
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
 
-      {/* VOLUME */}
+      {/* VOLUME — hidden on iOS (volume is hardware-only on iOS Safari) */}
       <div
-        className={`fixed top-4 left-4 z-[80] transition-all duration-300 ${activeSection === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`fixed top-4 left-4 z-[80] transition-all duration-300 ${activeSection === 3 || /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         onMouseEnter={() => setShowVolumeSlider(true)}
         onMouseLeave={() => setShowVolumeSlider(false)}
       >
