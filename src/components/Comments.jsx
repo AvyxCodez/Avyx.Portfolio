@@ -29,11 +29,14 @@ export default function Comments() {
   const [open, setOpen]             = useState(false);
   const [comments, setComments]     = useState([]);
   const [loading, setLoading]       = useState(true);
+  const [newest, setNewest]         = useState(true);
   const [showForm, setShowForm]     = useState(false);
   const [name, setName]             = useState('');
   const [message, setMessage]       = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
+
+  const sorted = newest ? [...comments] : [...comments].reverse();
 
   useEffect(() => {
     if (!open || !supabase) return;
@@ -79,6 +82,13 @@ export default function Comments() {
           <span className="text-base font-semibold text-white">Comments</span>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setNewest(n => !n)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium transition-all"
+          >
+            <i className="fa-solid fa-arrow-up-short-wide text-[9px]" />
+            {newest ? 'Newest first' : 'Oldest first'}
+          </button>
           <button
             onClick={() => { setShowForm(f => !f); setError(''); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold transition-all"
@@ -142,7 +152,7 @@ export default function Comments() {
         ) : comments.length === 0 ? (
           <p className="text-center text-white/25 text-xs py-10">No comments yet — be the first!</p>
         ) : (
-          comments.map((c) => (
+          sorted.map((c) => (
             <div key={c.id} className="flex gap-3.5 px-5 py-4 border-b border-white/[0.05] last:border-0 hover:bg-white/[0.02] transition-colors">
               <div
                 className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm font-bold uppercase"
@@ -195,13 +205,17 @@ export default function Comments() {
             />
 
             {isMobile ? (
-              /* Bottom sheet */
+              /* Bottom sheet with drag-to-dismiss */
               <motion.div
                 key="sheet"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                drag="y"
+                dragConstraints={{ top: 0 }}
+                dragElastic={{ top: 0, bottom: 0.4 }}
+                onDragEnd={(_, info) => { if (info.offset.y > 80) setOpen(false); }}
                 className="fixed bottom-0 left-0 right-0 z-[91] pointer-events-auto"
               >
                 {panelContent}
