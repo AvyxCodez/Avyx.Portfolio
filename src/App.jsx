@@ -773,7 +773,7 @@ function App() {
         }
 
         body, h1, h2, h3 {
-          font-family: 'Space Grotesk', system_ui, -apple-system, sans-serif;
+          font-family: 'Geist', system-ui, -apple-system, sans-serif;
         }
 
         @keyframes sparkle {
