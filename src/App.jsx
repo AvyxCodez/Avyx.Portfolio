@@ -893,8 +893,30 @@ function App() {
         </div>
       )}
 
+      {/* Dot Navigation */}
+      {!showEnter && (
+        <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[80] flex flex-col gap-3">
+          {['Profile', 'About', 'Projects', 'Music'].map((label, i) => (
+            <button
+              key={i}
+              onClick={() => scrollToSection(i)}
+              title={label}
+              className="group relative flex items-center justify-end gap-2"
+            >
+              <span className="absolute right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs text-white/70 whitespace-nowrap bg-black/50 px-2 py-0.5 rounded-md pointer-events-none">
+                {label}
+              </span>
+              <div className={`rounded-full transition-all duration-300 ${
+                activeSection === i
+                  ? 'w-2.5 h-2.5 bg-white'
+                  : 'w-2 h-2 bg-white/30 hover:bg-white/60'
+              }`} />
+            </button>
+          ))}
+        </div>
+      )}
 
-      <div ref={snapContainerRef} className={`snap-container relative z-20 h-screen overflow-y-scroll transition-all duration-500 ${showEnter ? 'blur-lg' : ''}`}>
+      <div ref={snapContainerRef} className={`snap-container relative z-20 h-screen overflow-y-scroll transition-all duration-500 ${showEnter ? 'blur-lg' : ''}`} style={{ scrollbarWidth: 'none' }}>
 
         {/* PAGE 1 - Profile Card */}
         <div className="snap-section min-h-screen flex flex-col items-center justify-center px-6">
