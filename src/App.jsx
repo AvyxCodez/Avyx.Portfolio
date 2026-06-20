@@ -458,7 +458,9 @@ function App() {
     activeSectionRef.current = clamped;
     setActiveSection(clamped);
     isScrollingRef.current = true;
-    smoothScrollTo(container, clamped * window.innerHeight);
+    const sections = container.querySelectorAll('.snap-section');
+    const targetY = sections[clamped]?.offsetTop ?? clamped * window.innerHeight;
+    smoothScrollTo(container, targetY);
   };
 
   useEffect(() => {
@@ -1175,10 +1177,10 @@ function App() {
         </div>
 
         {/* PAGE 4 - Music Player */}
-        <div ref={musicRef} className="snap-section relative border-t border-white/10 flex items-center justify-center p-3 lg:p-5" style={{ height: '100vh' }}>
+        <div ref={musicRef} className="snap-section relative border-t border-white/10" style={{ height: '100dvh' }}>
 
           {/* ── Rounded card ── */}
-          <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
+          <div className="absolute inset-3 lg:inset-5 rounded-3xl overflow-hidden shadow-2xl">
 
           {/* ── Full-bleed gradient background from cover ── */}
           <AnimatePresence mode="sync">

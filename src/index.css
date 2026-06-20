@@ -4,12 +4,12 @@
 
 .snap-container {
   overflow: hidden;
-  height: 100vh;
+  height: 100dvh;
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
 }
 
 .snap-section {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
