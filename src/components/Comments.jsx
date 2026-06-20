@@ -224,8 +224,8 @@ export default function Comments() {
     <>
       {/* Trigger */}
       <button onClick={() => setOpen(o => !o)}
-        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200"
-        style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', boxShadow: '0 0 16px rgba(255,255,255,0.25), 0 0 32px rgba(255,255,255,0.1)' }}>
+        className="fixed top-4 right-4 z-[80] w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110"
+        style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
         <i className="fa-regular fa-comment text-sm" />
       </button>
 
