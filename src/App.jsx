@@ -3,6 +3,7 @@ import { AnimatePresence, motion, animate } from "motion/react";
 import { Particles } from './components/Particles';
 import useCanvasCursor from "./components/useCanvasCursor";
 import DiscordPresence from "./components/DiscordPresence";
+import Comments from "./components/Comments";
 
 
 function DiscordBadgeIcon({ icon }) {
@@ -813,6 +814,8 @@ function App() {
 
       {/* Particles */}
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
+
+      <Comments />
 
       {/* VOLUME — hidden on iOS (volume is hardware-only on iOS Safari) */}
       <div
