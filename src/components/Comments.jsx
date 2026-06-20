@@ -29,7 +29,7 @@ export default function Comments() {
   const listRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !supabase) return;
     setLoading(true);
     supabase
       .from('comments')
@@ -46,6 +46,7 @@ export default function Comments() {
     if (!name.trim() || !message.trim()) { setError('Fill in both fields.'); return; }
     if (message.trim().length > 200) { setError('Keep it under 200 characters.'); return; }
     setError('');
+    if (!supabase) { setError('Comments unavailable.'); return; }
     setSubmitting(true);
     const { data, error: err } = await supabase
       .from('comments')
