@@ -160,6 +160,19 @@ const skills = [
   { name: 'Node.js',      pct: 72 },
 ];
 
+const projects = [
+  {
+    id: 1,
+    title: 'Lumora',
+    tagline: 'A cozy little home for your files.',
+    description: 'Drop a file, get a link — that\'s the whole thing. Instant file sharing with no account required, optional self-destructing uploads, and zero ads or tracking.',
+    tags: ['File Sharing', 'No Signup', '200MB Limit', 'Self-Destruct Uploads'],
+    url: 'https://lumora-io-production.up.railway.app/',
+    icon: 'fa-solid fa-link',
+    color: '#8b5cf6',
+  },
+];
+
 const gameLibrary = [
   {
     id: 1,
@@ -312,6 +325,9 @@ function App() {
   const [aboutVisible, setAboutVisible] = useState(false);
   const aboutRef = useRef(null);
 
+  const [projectsVisible, setProjectsVisible] = useState(false);
+  const projectsRef = useRef(null);
+
   const [musicVisible, setMusicVisible] = useState(false);
   const musicRef = useRef(null);
 
@@ -358,6 +374,15 @@ function App() {
       { threshold: 0.3 }
     );
     if (aboutRef.current) observer.observe(aboutRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setProjectsVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    if (projectsRef.current) observer.observe(projectsRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -1304,10 +1329,61 @@ function App() {
         </div>
 
         {/* PAGE 3 - Projects */}
-        <div className="snap-section min-h-screen flex flex-col items-center justify-center px-6 border-t border-white/10">
-          <div className="max-w-[520px] w-full text-center">
-            <h2 className="text-3xl font-semibold tracking-tight mb-4">My Projects</h2>
-            <div className="text-white/60 text-lg">Coming Soon!</div>
+        <div ref={projectsRef} className="snap-section min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 border-t border-white/[0.06]">
+          <div className="max-w-[900px] w-full mx-auto">
+
+            {/* Header */}
+            <div className={`mb-6 transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <p className="font-mono text-[10px] tracking-[4px] text-white/25 uppercase mb-1.5">02 / Projects</p>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight"
+                style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                What I've built
+              </h2>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {projects.map((project, i) => (
+                <button key={project.id}
+                  onClick={() => openExternalLink(project.url, project.title)}
+                  className={`group relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] overflow-hidden text-left transition-all duration-700 hover:border-white/[0.15] hover:bg-white/[0.05] ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${i * 100 + 100}ms` }}>
+
+                  {/* Banner */}
+                  <div className="relative h-32 flex items-center justify-center overflow-hidden"
+                    style={{ background: `linear-gradient(135deg, ${project.color}33, ${project.color}0d)` }}>
+                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                    <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-30 pointer-events-none" style={{ background: project.color }} />
+                    <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                      style={{ background: `${project.color}22`, border: `1px solid ${project.color}44` }}>
+                      <i className={`${project.icon} text-2xl`} style={{ color: project.color }} />
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h3 className="text-lg font-semibold text-white">{project.title}</h3>
+                      <i className="fa-solid fa-arrow-up-right text-white/25 text-xs group-hover:text-white/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </div>
+                    <p className="text-white/45 text-[13px] italic mb-2.5">{project.tagline}</p>
+                    <p className="text-white/55 text-[13px] leading-relaxed mb-3.5">{project.description}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {project.tags.map(tag => (
+                        <span key={tag} className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/[0.08] text-white/45">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </button>
+              ))}
+
+              {/* Coming soon placeholder */}
+              <div className={`relative rounded-2xl border border-dashed border-white/[0.1] flex flex-col items-center justify-center text-center p-8 min-h-[220px] transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: `${projects.length * 100 + 100}ms` }}>
+                <i className="fa-solid fa-plus text-white/20 text-xl mb-3" />
+                <p className="text-white/25 text-sm">More on the way</p>
+              </div>
+            </div>
           </div>
         </div>
 
