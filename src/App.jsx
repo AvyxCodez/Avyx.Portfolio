@@ -1278,7 +1278,8 @@ function App() {
                     <i className="fa-solid fa-backward-step" />
                   </button>
                   <button onClick={togglePlay}
-                    className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all active:scale-90">
+                    className="w-9 h-9 rounded-full text-white flex items-center justify-center transition-all active:scale-90"
+                    style={{ background: `color-mix(in srgb, ${albumColor} 55%, white 10%)` }}>
                     <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-sm`} />
                   </button>
                   <button onClick={nextSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
@@ -1290,8 +1291,11 @@ function App() {
               {/* ── MOBILE progress ── */}
               <div className="lg:hidden mt-3">
                 <div className="relative h-[2px] bg-white/15 rounded-full">
-                  <div className="absolute left-0 top-0 h-full bg-white/70 rounded-full pointer-events-none"
-                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
+                  <div className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
+                    style={{
+                      width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                      background: `linear-gradient(90deg, color-mix(in srgb, ${albumColor} 70%, white 30%), #fff)`,
+                    }} />
                   <input type="range" min="0" max={duration || 100} value={currentTime}
                     onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
                 </div>
@@ -1305,6 +1309,16 @@ function App() {
               <div className="hidden lg:flex flex-col">
                 {/* Glowing album art */}
                 <div className="relative w-64 h-64 mx-auto">
+                  {/* Rotating gradient ring, tinted to album color */}
+                  <div className="absolute -inset-3 rounded-[28px] overflow-hidden pointer-events-none">
+                    <div style={{
+                      position: 'absolute', inset: '-100%',
+                      background: `conic-gradient(from 0deg, transparent 320deg, color-mix(in srgb, ${albumColor} 85%, white 15%) 350deg, transparent 360deg)`,
+                      animation: isPlaying ? 'borderSpin 5s linear infinite' : 'none',
+                      transformOrigin: 'center center',
+                    }} />
+                  </div>
+
                   <AnimatePresence mode="wait">
                     <motion.div key={currentSong.id + '-glow'}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -1328,11 +1342,15 @@ function App() {
                   </AnimatePresence>
                 </div>
 
-                {/* Title + artist */}
+                {/* Track counter + Title + artist */}
                 <AnimatePresence mode="wait">
                   <motion.div key={currentSong.id + '-d-info'}
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }} className="mt-7">
+                    transition={{ duration: 0.3 }} className="mt-7 text-center">
+                    <p className="font-mono text-[10px] tracking-[4px] mb-1.5"
+                      style={{ color: `color-mix(in srgb, ${albumColor} 70%, white 30%)` }}>
+                      {String(songs.findIndex(s => s.id === currentSong.id) + 1).padStart(2, '0')} / {String(songs.length).padStart(2, '0')}
+                    </p>
                     <h2 className="text-2xl font-bold text-white leading-tight tracking-tight">{currentSong.title}</h2>
                     <p className="text-white/50 text-sm mt-1">{currentSong.artist}</p>
                   </motion.div>
@@ -1341,8 +1359,11 @@ function App() {
                 {/* Progress */}
                 <div className="mt-5">
                   <div className="relative h-[3px] bg-white/15 rounded-full group cursor-pointer">
-                    <div className="absolute left-0 top-0 h-full bg-white rounded-full pointer-events-none"
-                      style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
+                    <div className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
+                      style={{
+                        width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                        background: `linear-gradient(90deg, color-mix(in srgb, ${albumColor} 70%, white 30%), #fff)`,
+                      }} />
                     <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                       style={{ left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 7px)` }} />
                     <input type="range" min="0" max={duration || 100} value={currentTime}
@@ -1354,17 +1375,19 @@ function App() {
                   </div>
                 </div>
 
-                {/* Controls */}
-                <div className="mt-7 flex items-center gap-7">
+                {/* Controls dock */}
+                <div className="mt-7 mx-auto flex items-center gap-6 px-6 py-3 rounded-full"
+                  style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <button onClick={prevSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-backward-step text-2xl" />
+                    <i className="fa-solid fa-backward-step text-xl" />
                   </button>
                   <button onClick={togglePlay}
-                    className="w-16 h-16 rounded-full bg-white hover:bg-white/90 text-black flex items-center justify-center shadow-2xl transition-all hover:scale-105 active:scale-95">
-                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl ${!isPlaying ? 'ml-1' : ''}`} />
+                    className="w-14 h-14 rounded-full bg-white hover:bg-white/90 text-black flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                    style={{ boxShadow: `0 8px 22px color-mix(in srgb, ${albumColor} 55%, transparent)` }}>
+                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-lg ${!isPlaying ? 'ml-1' : ''}`} />
                   </button>
                   <button onClick={nextSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-forward-step text-2xl" />
+                    <i className="fa-solid fa-forward-step text-xl" />
                   </button>
                 </div>
 
@@ -1373,7 +1396,10 @@ function App() {
                   <p className="font-mono text-[9px] tracking-[3px] text-white/25 uppercase mb-2">Queue</p>
                   {songs.map((song) => (
                     <button key={song.id} onClick={() => selectSong(song)}
-                      className={`w-full flex items-center gap-3 px-2 py-2.5 rounded-xl text-left transition-all ${currentSong.id === song.id ? 'bg-white/10' : 'hover:bg-white/[0.06]'}`}>
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${currentSong.id === song.id ? 'bg-white/[0.07]' : 'hover:bg-white/[0.06]'}`}
+                      style={currentSong.id === song.id
+                        ? { boxShadow: `inset 2.5px 0 0 0 color-mix(in srgb, ${albumColor} 70%, white 30%)` }
+                        : {}}>
                       <img src={song.albumArt} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt="" />
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium truncate ${currentSong.id === song.id ? 'text-white' : 'text-white/55'}`}>{song.title}</p>
@@ -1382,8 +1408,8 @@ function App() {
                       {currentSong.id === song.id && isPlaying && (
                         <span className="flex gap-[3px] items-end h-3.5 flex-shrink-0 mr-1">
                           {[0.65,1,0.8].map((h, i) => (
-                            <span key={i} className="w-[3px] bg-white/70 rounded-full animate-pulse"
-                              style={{ height: `${h * 100}%`, animationDelay: `${i * 0.18}s` }} />
+                            <span key={i} className="w-[3px] rounded-full animate-pulse"
+                              style={{ height: `${h * 100}%`, animationDelay: `${i * 0.18}s`, background: `color-mix(in srgb, ${albumColor} 70%, white 30%)` }} />
                           ))}
                         </span>
                       )}
@@ -1453,7 +1479,10 @@ function App() {
               <div className="flex gap-3">
                 {songs.map((song) => (
                   <button key={song.id} onClick={() => selectSong(song)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl flex-1 min-w-0 transition-all text-left ${currentSong.id === song.id ? 'bg-white/12' : 'bg-white/[0.05] hover:bg-white/10'}`}>
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl flex-1 min-w-0 transition-all text-left ${currentSong.id === song.id ? 'bg-white/[0.08]' : 'bg-white/[0.05] hover:bg-white/10'}`}
+                    style={currentSong.id === song.id
+                      ? { boxShadow: `inset 2px 0 0 0 color-mix(in srgb, ${albumColor} 70%, white 30%)` }
+                      : {}}>
                     <img src={song.albumArt} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt="" />
                     <div className="min-w-0">
                       <p className={`text-xs font-medium truncate ${currentSong.id === song.id ? 'text-white' : 'text-white/50'}`}>{song.title}</p>
