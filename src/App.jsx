@@ -266,6 +266,49 @@ function App() {
   const [showGameLibrary, setShowGameLibrary] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
+  // Preloader — real asset load gated with a minimum duration so it never just flashes
+  const [siteLoading, setSiteLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const imgPromise = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = SITE_CONFIG.bgValue;
+    });
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 1600));
+
+    const t0 = performance.now();
+    const step = (now) => {
+      if (cancelled) return;
+      const p = Math.min((now - t0) / 1600, 1);
+      setLoadProgress(Math.floor(p * 90));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+
+    Promise.all([imgPromise, minDelay]).then(() => {
+      if (cancelled) return;
+      setLoadProgress(100);
+      setTimeout(() => { if (!cancelled) setSiteLoading(false); }, 350);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // Enter on keypress too
+  useEffect(() => {
+    if (siteLoading || !showEnter) return;
+    const onKey = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [siteLoading, showEnter]);
+
   const [aboutVisible, setAboutVisible] = useState(false);
   const aboutRef = useRef(null);
 
@@ -891,16 +934,51 @@ function App() {
         </div>
       </div>
 
+      {/* Preloader */}
+      <AnimatePresence>
+        {siteLoading && (
+          <motion.div key="loader"
+            initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[95] flex flex-col items-center justify-center bg-black cursor-none">
+            <div className="absolute w-80 h-80 rounded-full bg-white/[0.03] blur-3xl pointer-events-none" />
+            <div className="relative text-center">
+              <div className="text-white/80 font-mono text-xs tracking-[8px] mb-7">AVYX</div>
+              <div className="w-40 h-[2px] rounded-full bg-white/10 overflow-hidden mx-auto">
+                <div className="h-full bg-white/80 rounded-full transition-all duration-150 ease-out"
+                  style={{ width: `${loadProgress}%` }} />
+              </div>
+              <div className="mt-3 font-mono text-[10px] text-white/30 tabular-nums tracking-wider">{loadProgress}%</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Click to Enter */}
-      {showEnter && (
-        <div onClick={enterSite} className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 cursor-none">
-          <div className="text-center">
-            <div className="text-white text-2xl tracking-[6px] font-light mb-3">ENTER</div>
-            <div className="text-white/60 text-sm tracking-[3px] mb-8">AVYX</div>
-            <i className="fa-solid fa-play text-white/70 text-lg"></i>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {!siteLoading && showEnter && (
+          <motion.div key="enter"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }}
+            transition={{ duration: 0.5 }}
+            onClick={enterSite}
+            className="group fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 cursor-none">
+            <div className="absolute w-96 h-96 rounded-full bg-white/[0.025] blur-3xl pointer-events-none" />
+            <motion.div
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
+              className="relative text-center">
+              <div className="relative inline-flex items-center justify-center mb-7" style={{ animation: 'float 3s ease-in-out infinite' }}>
+                <span className="absolute inset-0 rounded-full border border-white/20 animate-ping" style={{ animationDuration: '2.2s' }} />
+                <div className="relative w-16 h-16 rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:border-white/50 group-hover:bg-white/5">
+                  <i className="fa-solid fa-play text-white/80 text-lg ml-1"></i>
+                </div>
+              </div>
+              <div className="text-white text-2xl tracking-[6px] font-light mb-2">ENTER</div>
+              <div className="text-white/50 text-sm tracking-[3px]">AVYX</div>
+              <div className="text-white/25 text-[10px] tracking-[2px] mt-5 font-mono uppercase">Click or press Enter</div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Dot Navigation */}
       {!showEnter && (
