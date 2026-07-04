@@ -730,8 +730,6 @@ function App() {
 
   const handleVolumeChange = (e) => setVolume(parseFloat(e.target.value));
 
-  const selectSong = (song) => setCurrentSong(song);
-
   const nextSong = () => {
     const i = songs.findIndex(s => s.id === currentSong.id);
     const next = songs[(i + 1) % songs.length];
@@ -1409,180 +1407,79 @@ function App() {
             </motion.div>
           </AnimatePresence>
 
-          {/* ── Content ── */}
-          <div className={`relative z-10 flex flex-col lg:flex-row h-full transition-opacity duration-700 ${musicVisible ? 'opacity-100' : 'opacity-0'}`}>
+          {/* ── Content — wide banner player + lyrics strip ── */}
+          <div className={`relative z-10 flex flex-col h-full transition-opacity duration-700 ${musicVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="w-full max-w-[820px] mx-auto flex flex-col h-full min-h-0 px-5 sm:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-12 pb-4 lg:pb-8">
 
-            {/* ════ LEFT PANEL — art + controls ════ */}
-            <div className="flex-shrink-0 flex flex-col lg:w-[400px] lg:justify-center px-6 sm:px-8 lg:px-14 pt-6 lg:pt-0 pb-3 lg:pb-0">
-
-              {/* ── MOBILE compact header ── */}
-              <div className="flex items-center gap-3 lg:hidden">
+              {/* ── Banner: art + info + controls ── */}
+              <div className="flex items-center gap-4 sm:gap-5 flex-shrink-0">
                 <AnimatePresence mode="wait">
-                  <motion.img key={currentSong.id + '-m-art'} src={currentSong.albumArt} alt=""
-                    initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-xl ring-1 ring-white/10" />
+                  <motion.img key={currentSong.id + '-art'} src={currentSong.albumArt} alt=""
+                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.35 }}
+                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl lg:rounded-2xl object-cover flex-shrink-0 shadow-2xl ring-1 ring-white/10" />
                 </AnimatePresence>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white text-sm leading-tight truncate">{currentSong.title}</p>
-                  <p className="text-white/45 text-xs truncate mt-0.5">{currentSong.artist}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={prevSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-backward-step" />
-                  </button>
-                  <button onClick={togglePlay}
-                    className="w-9 h-9 rounded-full text-white flex items-center justify-center transition-all active:scale-90"
-                    style={{ background: `color-mix(in srgb, ${albumColor} 55%, white 10%)` }}>
-                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-sm`} />
-                  </button>
-                  <button onClick={nextSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-forward-step" />
-                  </button>
-                </div>
-              </div>
 
-              {/* ── MOBILE progress ── */}
-              <div className="lg:hidden mt-3">
-                <div className="relative h-[2px] bg-white/15 rounded-full">
-                  <div className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
-                    style={{
-                      width: `${duration ? (currentTime / duration) * 100 : 0}%`,
-                      background: `linear-gradient(90deg, color-mix(in srgb, ${albumColor} 70%, white 30%), #fff)`,
-                    }} />
-                  <input type="range" min="0" max={duration || 100} value={currentTime}
-                    onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="font-mono text-[10px] text-white/30 tabular-nums">{formatTime(currentTime)}</span>
-                  <span className="font-mono text-[10px] text-white/30 tabular-nums">{formatTime(duration)}</span>
-                </div>
-              </div>
-
-              {/* ── DESKTOP large art + controls ── */}
-              <div className="hidden lg:flex flex-col">
-                {/* Glowing album art */}
-                <div className="relative w-64 h-64 mx-auto">
-                  {/* Rotating gradient ring, tinted to album color */}
-                  <div className="absolute -inset-3 rounded-[28px] overflow-hidden pointer-events-none">
-                    <div style={{
-                      position: 'absolute', inset: '-100%',
-                      background: `conic-gradient(from 0deg, transparent 320deg, color-mix(in srgb, ${albumColor} 85%, white 15%) 350deg, transparent 360deg)`,
-                      animation: isPlaying ? 'borderSpin 5s linear infinite' : 'none',
-                      transformOrigin: 'center center',
-                    }} />
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    <motion.div key={currentSong.id + '-glow'}
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      transition={{ duration: 0.9 }}
-                      className="absolute -inset-8 rounded-3xl"
-                      style={{
-                        backgroundImage: `url(${currentSong.albumArt})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        filter: 'blur(28px) brightness(0.65)',
-                        opacity: 0.75,
-                      }} />
-                  </AnimatePresence>
-                  <AnimatePresence mode="wait">
-                    <motion.img key={currentSong.id + '-d-art'} src={currentSong.albumArt} alt=""
-                      initial={{ opacity: 0, scale: 0.88, y: 8 }}
-                      animate={{ opacity: 1, scale: isPlaying ? 1 : 0.96, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.88, y: -8 }}
-                      transition={{ duration: 0.45 }}
-                      className="relative w-full h-full rounded-2xl object-cover shadow-2xl" />
-                  </AnimatePresence>
-                </div>
-
-                {/* Track counter + Title + artist */}
                 <AnimatePresence mode="wait">
-                  <motion.div key={currentSong.id + '-d-info'}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }} className="mt-7 text-center">
-                    <p className="font-mono text-[10px] tracking-[4px] mb-1.5"
+                  <motion.div key={currentSong.id + '-info'} className="flex-1 min-w-0"
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.3 }}>
+                    <p className="font-mono text-[9px] sm:text-[10px] tracking-[3px] uppercase mb-1"
                       style={{ color: `color-mix(in srgb, ${albumColor} 70%, white 30%)` }}>
-                      {String(songs.findIndex(s => s.id === currentSong.id) + 1).padStart(2, '0')} / {String(songs.length).padStart(2, '0')}
+                      Now Playing · {String(songs.findIndex(s => s.id === currentSong.id) + 1).padStart(2, '0')}/{String(songs.length).padStart(2, '0')}
                     </p>
-                    <h2 className="text-2xl font-bold text-white leading-tight tracking-tight">{currentSong.title}</h2>
-                    <p className="text-white/50 text-sm mt-1">{currentSong.artist}</p>
+                    <h2 className="text-lg sm:text-2xl font-bold text-white leading-tight tracking-tight truncate">{currentSong.title}</h2>
+                    <p className="text-white/50 text-xs sm:text-sm mt-0.5 truncate">{currentSong.artist}</p>
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Progress */}
-                <div className="mt-5">
-                  <div className="relative h-[3px] bg-white/15 rounded-full group cursor-pointer">
-                    <div className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
-                      style={{
-                        width: `${duration ? (currentTime / duration) * 100 : 0}%`,
-                        background: `linear-gradient(90deg, color-mix(in srgb, ${albumColor} 70%, white 30%), #fff)`,
-                      }} />
-                    <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                      style={{ left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 7px)` }} />
-                    <input type="range" min="0" max={duration || 100} value={currentTime}
-                      onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
-                  </div>
-                  <div className="flex justify-between mt-1.5">
-                    <span className="font-mono text-[11px] text-white/35 tabular-nums">{formatTime(currentTime)}</span>
-                    <span className="font-mono text-[11px] text-white/35 tabular-nums">{formatTime(duration)}</span>
-                  </div>
-                </div>
-
-                {/* Controls dock */}
-                <div className="mt-7 mx-auto flex items-center gap-6 px-6 py-3 rounded-full"
-                  style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <button onClick={prevSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-backward-step text-xl" />
+                {/* Controls */}
+                <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+                  <button onClick={prevSong} className="text-white/60 hover:text-white transition-colors active:scale-90">
+                    <i className="fa-solid fa-backward-step text-lg sm:text-xl" />
                   </button>
                   <button onClick={togglePlay}
-                    className="w-14 h-14 rounded-full bg-white hover:bg-white/90 text-black flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                    style={{ boxShadow: `0 8px 22px color-mix(in srgb, ${albumColor} 55%, transparent)` }}>
-                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-lg ${!isPlaying ? 'ml-1' : ''}`} />
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95"
+                    style={{
+                      background: 'rgba(255,255,255,0.14)',
+                      backdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      boxShadow: `0 8px 22px color-mix(in srgb, ${albumColor} 45%, transparent)`,
+                    }}>
+                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-base sm:text-lg ${!isPlaying ? 'ml-0.5' : ''}`} />
                   </button>
-                  <button onClick={nextSong} className="text-white/55 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-forward-step text-xl" />
+                  <button onClick={nextSong} className="text-white/60 hover:text-white transition-colors active:scale-90">
+                    <i className="fa-solid fa-forward-step text-lg sm:text-xl" />
                   </button>
-                </div>
-
-                {/* Queue */}
-                <div className="mt-8">
-                  <p className="font-mono text-[9px] tracking-[3px] text-white/25 uppercase mb-2">Queue</p>
-                  {songs.map((song) => (
-                    <button key={song.id} onClick={() => selectSong(song)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${currentSong.id === song.id ? 'bg-white/[0.07]' : 'hover:bg-white/[0.06]'}`}
-                      style={currentSong.id === song.id
-                        ? { boxShadow: `inset 2.5px 0 0 0 color-mix(in srgb, ${albumColor} 70%, white 30%)` }
-                        : {}}>
-                      <img src={song.albumArt} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt="" />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${currentSong.id === song.id ? 'text-white' : 'text-white/55'}`}>{song.title}</p>
-                        <p className="text-xs text-white/30 truncate">{song.artist}</p>
-                      </div>
-                      {currentSong.id === song.id && isPlaying && (
-                        <span className="flex gap-[3px] items-end h-3.5 flex-shrink-0 mr-1">
-                          {[0.65,1,0.8].map((h, i) => (
-                            <span key={i} className="w-[3px] rounded-full animate-pulse"
-                              style={{ height: `${h * 100}%`, animationDelay: `${i * 0.18}s`, background: `color-mix(in srgb, ${albumColor} 70%, white 30%)` }} />
-                          ))}
-                        </span>
-                      )}
-                    </button>
-                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* ════ RIGHT PANEL — lyrics ════ */}
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-6 sm:px-8 lg:px-10 lg:pr-16 pb-4 lg:pb-16 lg:pt-14">
-              <p className="font-mono text-[10px] tracking-[4px] text-white/22 uppercase mb-3 flex-shrink-0 lg:mb-5">Lyrics</p>
+              {/* ── Progress ── */}
+              <div className="mt-4 sm:mt-5 flex-shrink-0">
+                <div className="relative h-[4px] bg-white/15 rounded-full group cursor-pointer">
+                  <div className="absolute left-0 top-0 h-full bg-white rounded-full pointer-events-none"
+                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    style={{ left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 6px)` }} />
+                  <input type="range" min="0" max={duration || 100} value={currentTime}
+                    onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                </div>
+                <div className="flex justify-between mt-1.5">
+                  <span className="font-mono text-[10px] sm:text-[11px] text-white/35 tabular-nums">{formatTime(currentTime)}</span>
+                  <span className="font-mono text-[10px] sm:text-[11px] text-white/35 tabular-nums">{formatTime(duration)}</span>
+                </div>
+              </div>
 
+              {/* ── Divider ── */}
+              <div className="mt-3 sm:mt-4 border-t border-white/10 flex-shrink-0" />
+
+              {/* ── Lyrics strip ── */}
               <AnimatePresence mode="wait">
                 <motion.div key={currentSong.id + '-lyrics'}
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                   ref={lyricsContainerRef}
-                  className="flex-1 overflow-y-scroll min-h-0"
+                  className="flex-1 overflow-y-scroll min-h-0 mt-2"
                   style={{
                     scrollbarWidth: 'none',
                     maskImage: 'linear-gradient(to bottom, transparent, white 7%, white 88%, transparent)',
@@ -1625,26 +1522,6 @@ function App() {
                   )}
                 </motion.div>
               </AnimatePresence>
-            </div>
-
-            {/* ── MOBILE queue (below lyrics) ── */}
-            <div className="lg:hidden flex-shrink-0 px-6 pb-5 pt-2">
-              <p className="font-mono text-[9px] tracking-[3px] text-white/22 uppercase mb-2">Queue</p>
-              <div className="flex gap-3">
-                {songs.map((song) => (
-                  <button key={song.id} onClick={() => selectSong(song)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl flex-1 min-w-0 transition-all text-left ${currentSong.id === song.id ? 'bg-white/[0.08]' : 'bg-white/[0.05] hover:bg-white/10'}`}
-                    style={currentSong.id === song.id
-                      ? { boxShadow: `inset 2px 0 0 0 color-mix(in srgb, ${albumColor} 70%, white 30%)` }
-                      : {}}>
-                    <img src={song.albumArt} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt="" />
-                    <div className="min-w-0">
-                      <p className={`text-xs font-medium truncate ${currentSong.id === song.id ? 'text-white' : 'text-white/50'}`}>{song.title}</p>
-                      <p className="text-[10px] text-white/28 truncate">{song.artist}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
           </div>{/* rounded card */}
