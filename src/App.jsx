@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion, animate } from "motion/react";
 import { Particles } from './components/Particles';
 import useCanvasCursor from "./components/useCanvasCursor";
-import DiscordPresence from "./components/DiscordPresence";
 import Comments from "./components/Comments";
 
 
@@ -1168,166 +1167,121 @@ function App() {
           </div>
         </div>
 
-        {/* PAGE 2 — About Me */}
+        {/* PAGE 2 — About Me (sidebar identity rail + content column) */}
         <div ref={aboutRef} className="snap-section min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 border-t border-white/[0.06]">
-          <div className="max-w-[900px] w-full mx-auto">
+          <div className="max-w-[900px] w-full mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-stretch">
 
-            {/* Header */}
-            <div className={`mb-5 transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="w-6 h-px" style={{ background: ACCENT }} />
-                <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>01 / About</p>
+            {/* ── Identity rail ── */}
+            <div className={`order-2 lg:order-1 flex-shrink-0 lg:w-[230px] transition-all duration-700 delay-200 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] overflow-hidden h-full
+                flex lg:flex-col items-center lg:justify-center gap-4 lg:gap-0 p-4 lg:p-6 lg:text-center">
+                <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-40 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: `${ACCENT}14` }} />
+
+                {/* Avatar + status */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-14 h-14 lg:w-[72px] lg:h-[72px] rounded-full p-[2px]"
+                    style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
+                    <div className="w-full h-full rounded-full overflow-hidden">
+                      <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Avatar" />
+                    </div>
+                  </div>
+                  <span className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[#0a0a0a] ${
+                    discordStatus === 'online' ? 'bg-emerald-400' :
+                    discordStatus === 'idle'   ? 'bg-yellow-400' :
+                    discordStatus === 'dnd'    ? 'bg-red-500' : 'bg-zinc-500'
+                  }`} />
+                </div>
+
+                {/* Name + status text */}
+                <div className="flex-1 lg:flex-none min-w-0 lg:mt-3">
+                  <p className="text-sm font-semibold text-white truncate">Avy.js</p>
+                  <p className={`text-[11px] mt-0.5 ${
+                    discordStatus === 'online' ? 'text-emerald-400' :
+                    discordStatus === 'idle'   ? 'text-yellow-400' :
+                    discordStatus === 'dnd'    ? 'text-red-400' : 'text-white/35'
+                  }`}>
+                    {discordStatus === 'online' ? '● Online' : discordStatus === 'idle' ? '● Idle' : discordStatus === 'dnd' ? '● Do Not Disturb' : '● Offline'}
+                  </p>
+                </div>
+
+                <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
+
+                {/* Clock */}
+                <div className="flex-shrink-0 text-right lg:text-center">
+                  <div className="font-mono text-lg lg:text-2xl font-semibold text-white tabular-nums leading-none">{formatClock(clockTime)}</div>
+                  <p className="font-mono text-[10px] text-white/30 mt-1">GMT−7 · Denver</p>
+                </div>
+
+                <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
+
+                {/* Availability */}
+                <div className="hidden lg:flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399] flex-shrink-0" />
+                  <span className="font-mono text-[10px] text-white/35 tracking-wide">Available for work</span>
+                </div>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
-                style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Who I am
-              </h2>
             </div>
 
-            {/* ── MOBILE LAYOUT (< lg) ── */}
-            <div className="flex flex-col gap-3 lg:hidden">
+            {/* ── Content column ── */}
+            <div className="order-1 lg:order-2 flex-1 min-w-0">
+
+              {/* Header */}
+              <div className={`mb-4 transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="w-6 h-px" style={{ background: ACCENT }} />
+                  <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>01 / About</p>
+                </div>
+                <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
+                  style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Who I am
+                </h2>
+              </div>
 
               {/* Bio */}
-              <div className={`relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-4 overflow-hidden transition-all duration-700 delay-100 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
-                <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase mb-2">Bio</p>
-                <p className="text-white/60 text-[13px] leading-relaxed mb-3">
-                  Developer &amp; programmer based in <span className="text-white/85 font-medium">Denver, CO</span>. Working at <span className="text-white/85 font-medium">Amazon Robotics</span>. Open to opportunities.
-                </p>
-                <div className="flex flex-col gap-2 mt-1">
-                  {skills.map((skill, i) => (
-                    <div key={skill.name}>
-                      <div className="flex justify-between mb-1">
-                        <span className="font-mono text-[10px] text-white/45">{skill.name}</span>
-                        <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
-                      </div>
-                      <div className="h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                        <div className="h-full rounded-full transition-all ease-out"
-                          style={{
-                            width: aboutVisible ? `${skill.pct}%` : '0%',
-                            transitionDuration: '900ms',
-                            transitionDelay: `${i * 80 + 150}ms`,
-                            background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
-                          }} />
-                      </div>
+              <p className={`text-white/60 text-[13px] sm:text-[15px] leading-relaxed mb-5 transition-all duration-700 delay-100 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                Hi, Avy here — developer &amp; programmer based in <span className="text-white/90 font-medium">Denver, CO</span>. Currently working at <span className="text-white/90 font-medium">Amazon Robotics</span>. Open to new opportunities.
+              </p>
+
+              {/* Skills — two-column grid */}
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mb-6 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                {skills.map((skill, i) => (
+                  <div key={skill.name}>
+                    <div className="flex justify-between mb-1">
+                      <span className="font-mono text-[10px] text-white/50">{skill.name}</span>
+                      <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="h-full rounded-full transition-all ease-out"
+                        style={{
+                          width: aboutVisible ? `${skill.pct}%` : '0%',
+                          transitionDuration: '900ms',
+                          transitionDelay: `${i * 80 + 200}ms`,
+                          background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
+                        }} />
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Clock + Discord side by side */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className={`relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-4 overflow-hidden flex flex-col justify-between transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <div>
-                    <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase mb-2">Time</p>
-                    <div className="font-mono text-xl font-semibold text-white tabular-nums leading-none">{formatClock(clockTime)}</div>
-                    <p className="font-mono text-[10px] text-white/25 mt-1.5">GMT−7 · Denver</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]" />
-                    <span className="font-mono text-[9px] text-white/25">Available</span>
-                  </div>
-                </div>
-
-                <div className={`transition-all duration-700 delay-200 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <DiscordPresence userId={DISCORD_USER_ID} compact />
-                </div>
-              </div>
-
-              {/* Games horizontal strip */}
-              <div className={`relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-4 overflow-hidden transition-all duration-700 delay-250 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              {/* Game collection */}
+              <div className={`transition-all duration-700 delay-300 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase">Games</p>
-                  <button onClick={() => setShowGameLibrary(true)} className="font-mono text-[10px] text-white/30 hover:text-white/70 flex items-center gap-1 transition-colors">
+                  <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase">Game Collection</p>
+                  <button onClick={() => setShowGameLibrary(true)} className="font-mono text-[10px] text-white/30 hover:text-white/70 flex items-center gap-1.5 transition-colors duration-150">
                     VIEW ALL <i className="fa-solid fa-arrow-right text-[8px]" />
                   </button>
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                  {gameLibrary.map((game, i) => (
-                    <div key={game.id} onClick={() => { setCurrentGameIndex(i); setShowGameLibrary(true); }}
-                      className="flex-shrink-0 cursor-pointer group">
-                      <div className="relative w-14 h-20 rounded-lg overflow-hidden border border-white/[0.08]">
-                        <img src={game.cover} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="grid grid-cols-5 gap-2">
+                  {gameLibrary.slice(0, 5).map((game, i) => (
+                    <div key={game.id} onClick={() => { setCurrentGameIndex(i); setShowGameLibrary(true); }} className="group cursor-pointer">
+                      <div className="relative aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden border border-white/[0.08] bg-black/30">
+                        <img src={game.cover} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className={`hidden sm:block absolute top-1.5 right-1.5 px-1.5 py-0.5 text-[7px] font-semibold rounded-full ${getStatusColor(game.status)}`}>{game.status}</div>
                       </div>
+                      <p className="hidden sm:block mt-1.5 font-mono text-[10px] line-clamp-1 text-white/35 group-hover:text-white/75 transition-colors duration-200">{game.title}</p>
                     </div>
                   ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ── DESKTOP LAYOUT (lg+) ── */}
-            <div className="hidden lg:flex lg:flex-col gap-3">
-
-              {/* Row 1 — Bio + Clock */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className={`col-span-2 relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-5 overflow-hidden transition-all duration-700 delay-100 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
-                  <div className="absolute -top-12 -left-12 w-48 h-48 bg-white/[0.025] rounded-full blur-3xl pointer-events-none" />
-                  <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase mb-3">Bio</p>
-                  <p className="text-white/65 text-[15px] leading-relaxed mb-4">
-                    Hi, Avy here — developer &amp; programmer based in <span className="text-white/90 font-medium">Denver, CO</span>. Currently working at <span className="text-white/90 font-medium">Amazon Robotics</span>. Open to new opportunities.
-                  </p>
-                  <div className="flex flex-col gap-2.5 mt-1">
-                    {skills.map((skill, i) => (
-                      <div key={skill.name}>
-                        <div className="flex justify-between mb-1">
-                          <span className="font-mono text-[10px] text-white/50">{skill.name}</span>
-                          <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
-                        </div>
-                        <div className="h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                          <div className="h-full rounded-full transition-all ease-out"
-                            style={{
-                              width: aboutVisible ? `${skill.pct}%` : '0%',
-                              transitionDuration: '900ms',
-                              transitionDelay: `${i * 80 + 200}ms`,
-                              background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
-                            }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-5 overflow-hidden flex flex-col justify-between transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
-                  <div>
-                    <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase mb-4">Local Time</p>
-                    <div className="font-mono text-[2.2rem] font-semibold text-white tracking-tight tabular-nums leading-none">{formatClock(clockTime)}</div>
-                    <p className="font-mono text-[11px] text-white/30 mt-2">GMT−7 · Denver, CO</p>
-                  </div>
-                  <div className="mt-5 pt-4 border-t border-white/[0.06] flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399] flex-shrink-0" />
-                    <span className="font-mono text-[10px] text-white/30 tracking-wide">Available for work</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 2 — Discord + Games */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className={`transition-all duration-700 delay-200 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <DiscordPresence userId={DISCORD_USER_ID} />
-                </div>
-
-                <div className={`col-span-2 relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] p-5 overflow-hidden transition-all duration-700 delay-300 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase">Game Collection</p>
-                    <button onClick={() => setShowGameLibrary(true)} className="font-mono text-[10px] text-white/30 hover:text-white/70 flex items-center gap-1.5 transition-colors duration-150">
-                      VIEW ALL <i className="fa-solid fa-arrow-right text-[8px]" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2">
-                    {gameLibrary.slice(0, 5).map((game, i) => (
-                      <div key={game.id} onClick={() => { setCurrentGameIndex(i); setShowGameLibrary(true); }} className="group cursor-pointer">
-                        <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-white/[0.08] bg-black/30">
-                          <img src={game.cover} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          <div className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 text-[7px] font-semibold rounded-full ${getStatusColor(game.status)}`}>{game.status}</div>
-                        </div>
-                        <p className="mt-1.5 font-mono text-[10px] line-clamp-1 text-white/35 group-hover:text-white/75 transition-colors duration-200">{game.title}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
