@@ -130,6 +130,8 @@ const SITE_CONFIG = {
 
 const DISCORD_USER_ID = "825785012468056155";
 
+const ACCENT = "#6366f1";
+
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 const fadeTexts = ["Welcome", "Developer", "WebDev", "Scroll for more!"];
@@ -330,6 +332,7 @@ function App() {
 
   const [musicVisible, setMusicVisible] = useState(false);
   const musicRef = useRef(null);
+  const [showLyrics, setShowLyrics] = useState(false);
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
@@ -598,7 +601,7 @@ function App() {
       if (t < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
-  }, [currentLyricIndex]);
+  }, [currentLyricIndex, showLyrics]);
 
   const audioRef = useRef(null);
   const videoRef = useRef(null);
@@ -882,7 +885,8 @@ function App() {
         )}
       </div>
 
-      <div className="fixed inset-0 z-10 bg-black/40 pointer-events-none" />
+      <div className="fixed inset-0 z-10 bg-black/50 pointer-events-none" />
+      <div className="fixed inset-0 z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 40%, transparent 0%, rgba(0,0,0,0.45) 100%)' }} />
 
       {/* Particles */}
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
@@ -967,8 +971,8 @@ function App() {
             <div className="relative text-center">
               <div className="text-white/80 font-mono text-xs tracking-[8px] mb-7">AVYX</div>
               <div className="w-40 h-[2px] rounded-full bg-white/10 overflow-hidden mx-auto">
-                <div className="h-full bg-white/80 rounded-full transition-all duration-150 ease-out"
-                  style={{ width: `${loadProgress}%` }} />
+                <div className="h-full rounded-full transition-all duration-150 ease-out"
+                  style={{ width: `${loadProgress}%`, background: `linear-gradient(90deg, ${ACCENT}, #fff)` }} />
               </div>
               <div className="mt-3 font-mono text-[10px] text-white/30 tabular-nums tracking-wider">{loadProgress}%</div>
             </div>
@@ -1018,9 +1022,10 @@ function App() {
               </span>
               <div className={`rounded-full transition-all duration-300 ${
                 activeSection === i
-                  ? 'w-2.5 h-2.5 bg-white'
-                  : 'w-2 h-2 bg-white/30 hover:bg-white/60'
-              }`} />
+                  ? 'w-2 h-5'
+                  : 'w-2 h-2 bg-white/25 hover:bg-white/60'
+              }`}
+                style={activeSection === i ? { background: ACCENT, boxShadow: `0 0 10px ${ACCENT}88` } : {}} />
             </button>
           ))}
         </div>
@@ -1040,7 +1045,7 @@ function App() {
             <div className="absolute -inset-[1px] rounded-[28px] overflow-hidden pointer-events-none">
               <div style={{
                 position: 'absolute', inset: '-100%',
-                background: 'conic-gradient(from 0deg, transparent 330deg, rgba(255,255,255,0.35) 355deg, transparent 360deg)',
+                background: `conic-gradient(from 0deg, transparent 320deg, ${ACCENT}99 348deg, rgba(255,255,255,0.5) 355deg, transparent 360deg)`,
                 animation: 'borderSpin 4s linear infinite',
                 transformOrigin: 'center center'
               }} />
@@ -1059,7 +1064,7 @@ function App() {
                   <div className="relative">
                     {/* Gradient ring */}
                     <div className="relative w-[108px] h-[108px] rounded-full p-[2.5px]"
-                      style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05))' }}>
+                      style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
                       <div className="w-full h-full rounded-full overflow-hidden">
                         <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
                       </div>
@@ -1126,7 +1131,8 @@ function App() {
 
                 {/* Cycling text */}
                 <div className="h-5 flex items-center justify-center mb-6">
-                  <span className={`text-[11px] tracking-[4px] uppercase text-white/30 transition-opacity duration-500 ${fadeVisible ? 'opacity-100' : 'opacity-0'}`}>
+                  <span className={`text-[11px] tracking-[4px] uppercase transition-opacity duration-500 ${fadeVisible ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ color: `${ACCENT}bb` }}>
                     {fadeTexts[currentFadeIndex]}
                   </span>
                 </div>
@@ -1135,24 +1141,24 @@ function App() {
                 <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
 
                 {/* Social icons */}
-                <div className="flex justify-center gap-5 text-4xl">
+                <div className="flex justify-center gap-3">
                   <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer"
-                    className="text-white/70 hover:text-white transition-all duration-200 hover:scale-125 drop-shadow-[0_0_6px_#ffffff] hover:drop-shadow-[0_0_14px_#5865F2]">
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-discord" />
                   </a>
                   <a href="#"
-                    className="text-white/70 hover:text-white transition-all duration-200 hover:scale-125 drop-shadow-[0_0_6px_#ffffff] hover:drop-shadow-[0_0_14px_#ffffff]">
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-x-twitter" />
                   </a>
                   <a href="#"
-                    className="text-white/70 hover:text-white transition-all duration-200 hover:scale-125 drop-shadow-[0_0_6px_#ffffff] hover:drop-shadow-[0_0_14px_#ff6b35] flex items-center">
-                    <svg viewBox="0 0 100 100" width="0.85em" height="0.85em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                    <svg viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <polygon points="50,2 93,26 93,74 50,98 7,74 7,26" />
                       <text x="50" y="66" textAnchor="middle" fontFamily="Arial Black,sans-serif" fontWeight="900" fontSize="38" fill="#000">cfx</text>
                     </svg>
                   </a>
                   <a href="#"
-                    className="text-white/70 hover:text-white transition-all duration-200 hover:scale-125 drop-shadow-[0_0_6px_#ffffff] hover:drop-shadow-[0_0_14px_#E1306C]">
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-instagram" />
                   </a>
                 </div>
@@ -1168,8 +1174,11 @@ function App() {
 
             {/* Header */}
             <div className={`mb-5 transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <p className="font-mono text-[10px] tracking-[4px] text-white/25 uppercase mb-1.5">01 / About</p>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight"
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-6 h-px" style={{ background: ACCENT }} />
+                <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>01 / About</p>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
                 style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Who I am
               </h2>
@@ -1198,7 +1207,7 @@ function App() {
                             width: aboutVisible ? `${skill.pct}%` : '0%',
                             transitionDuration: '900ms',
                             transitionDelay: `${i * 80 + 150}ms`,
-                            background: 'linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.2))',
+                            background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
                           }} />
                       </div>
                     </div>
@@ -1272,7 +1281,7 @@ function App() {
                               width: aboutVisible ? `${skill.pct}%` : '0%',
                               transitionDuration: '900ms',
                               transitionDelay: `${i * 80 + 200}ms`,
-                              background: 'linear-gradient(90deg, rgba(255,255,255,0.75), rgba(255,255,255,0.2))',
+                              background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
                             }} />
                         </div>
                       </div>
@@ -1332,8 +1341,11 @@ function App() {
 
             {/* Header */}
             <div className={`mb-6 transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <p className="font-mono text-[10px] tracking-[4px] text-white/25 uppercase mb-1.5">02 / Projects</p>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight"
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-6 h-px" style={{ background: ACCENT }} />
+                <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>02 / Projects</p>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
                 style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 What I've built
               </h2>
@@ -1388,140 +1400,146 @@ function App() {
         {/* PAGE 4 - Music Player */}
         <div ref={musicRef} className="snap-section relative border-t border-white/10" style={{ height: '100dvh' }}>
 
-          {/* ── Rounded card ── */}
-          <div className="absolute inset-3 lg:inset-5 rounded-3xl overflow-hidden shadow-2xl">
+          {/* ── Inner wrapper ── */}
+          <div className="absolute inset-3 lg:inset-5">
 
-          {/* ── Full-bleed gradient background from cover ── */}
-          <AnimatePresence mode="sync">
-            <motion.div key={currentSong.id + '-fullbg'} className="absolute inset-0 z-0"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 1.1 }}>
-              <img src={currentSong.albumArt} alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ transform: 'scale(1.4)', filter: 'blur(80px) saturate(2.2) brightness(0.28)' }} />
-              <div className="absolute inset-0 bg-black/30" />
-              {/* vignette: dark edges, lighter centre */}
-              <div className="absolute inset-0" style={{
-                background: 'radial-gradient(ellipse 100% 90% at 50% 35%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)'
-              }} />
-            </motion.div>
-          </AnimatePresence>
+          {/* ── Content — compact iOS-style player card ── */}
+          <div className={`relative z-10 flex items-center justify-center h-full px-5 transition-opacity duration-700 ${musicVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="w-full max-w-[380px] max-h-full overflow-y-auto rounded-[2rem]"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+                scrollbarWidth: 'none',
+              }}>
+              <div className="p-5 sm:p-6 flex flex-col">
 
-          {/* ── Content — wide banner player + lyrics strip ── */}
-          <div className={`relative z-10 flex flex-col h-full transition-opacity duration-700 ${musicVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="w-full max-w-[820px] mx-auto flex flex-col h-full min-h-0 px-5 sm:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-12 pb-4 lg:pb-8">
-
-              {/* ── Banner: art + info + controls ── */}
-              <div className="flex items-center gap-4 sm:gap-5 flex-shrink-0">
+                {/* Album art */}
                 <AnimatePresence mode="wait">
                   <motion.img key={currentSong.id + '-art'} src={currentSong.albumArt} alt=""
-                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.94 }}
                     transition={{ duration: 0.35 }}
-                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl lg:rounded-2xl object-cover flex-shrink-0 shadow-2xl ring-1 ring-white/10" />
+                    className="w-full aspect-square rounded-2xl object-cover shadow-2xl" />
                 </AnimatePresence>
 
-                <AnimatePresence mode="wait">
-                  <motion.div key={currentSong.id + '-info'} className="flex-1 min-w-0"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.3 }}>
-                    <p className="font-mono text-[9px] sm:text-[10px] tracking-[3px] uppercase mb-1"
-                      style={{ color: `color-mix(in srgb, ${albumColor} 70%, white 30%)` }}>
-                      Now Playing · {String(songs.findIndex(s => s.id === currentSong.id) + 1).padStart(2, '0')}/{String(songs.length).padStart(2, '0')}
-                    </p>
-                    <h2 className="text-lg sm:text-2xl font-bold text-white leading-tight tracking-tight truncate">{currentSong.title}</h2>
-                    <p className="text-white/50 text-xs sm:text-sm mt-0.5 truncate">{currentSong.artist}</p>
-                  </motion.div>
-                </AnimatePresence>
+                {/* Title + equalizer */}
+                <div className="flex items-center justify-between gap-3 mt-5">
+                  <AnimatePresence mode="wait">
+                    <motion.div key={currentSong.id + '-info'} className="min-w-0"
+                      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.25 }}>
+                      <h2 className="text-lg font-bold text-white leading-tight truncate">{currentSong.title}</h2>
+                      <p className="text-white/50 text-sm truncate">{currentSong.artist}</p>
+                    </motion.div>
+                  </AnimatePresence>
+                  {isPlaying && (
+                    <span className="flex gap-[3px] items-end h-4 flex-shrink-0">
+                      {[0.6, 1, 0.75, 0.45].map((h, i) => (
+                        <span key={i} className="w-[3px] bg-white/80 rounded-full animate-pulse"
+                          style={{ height: `${h * 100}%`, animationDelay: `${i * 0.15}s` }} />
+                      ))}
+                    </span>
+                  )}
+                </div>
+
+                {/* Progress */}
+                <div className="mt-4">
+                  <div className="relative h-[5px] bg-white/20 rounded-full group cursor-pointer">
+                    <div className="absolute left-0 top-0 h-full bg-white/90 rounded-full pointer-events-none"
+                      style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
+                    <input type="range" min="0" max={duration || 100} value={currentTime}
+                      onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                  </div>
+                  <div className="flex justify-between mt-1.5">
+                    <span className="font-mono text-[11px] text-white/40 tabular-nums">{formatTime(currentTime)}</span>
+                    <span className="font-mono text-[11px] text-white/40 tabular-nums">-{formatTime(Math.max(0, duration - currentTime))}</span>
+                  </div>
+                </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-                  <button onClick={prevSong} className="text-white/60 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-backward-step text-lg sm:text-xl" />
+                <div className="flex items-center justify-center gap-12 mt-4">
+                  <button onClick={prevSong} className="text-white/85 hover:text-white transition-all active:scale-90">
+                    <i className="fa-solid fa-backward text-2xl" />
                   </button>
-                  <button onClick={togglePlay}
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95"
-                    style={{
-                      background: 'rgba(255,255,255,0.14)',
-                      backdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: `0 8px 22px color-mix(in srgb, ${albumColor} 45%, transparent)`,
-                    }}>
-                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-base sm:text-lg ${!isPlaying ? 'ml-0.5' : ''}`} />
+                  <button onClick={togglePlay} className="text-white transition-all hover:scale-105 active:scale-95 w-10 text-center">
+                    <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-4xl`} />
                   </button>
-                  <button onClick={nextSong} className="text-white/60 hover:text-white transition-colors active:scale-90">
-                    <i className="fa-solid fa-forward-step text-lg sm:text-xl" />
+                  <button onClick={nextSong} className="text-white/85 hover:text-white transition-all active:scale-90">
+                    <i className="fa-solid fa-forward text-2xl" />
                   </button>
                 </div>
-              </div>
 
-              {/* ── Progress ── */}
-              <div className="mt-4 sm:mt-5 flex-shrink-0">
-                <div className="relative h-[4px] bg-white/15 rounded-full group cursor-pointer">
-                  <div className="absolute left-0 top-0 h-full bg-white rounded-full pointer-events-none"
-                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
-                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                    style={{ left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 6px)` }} />
-                  <input type="range" min="0" max={duration || 100} value={currentTime}
-                    onChange={handleSeek} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
-                </div>
-                <div className="flex justify-between mt-1.5">
-                  <span className="font-mono text-[10px] sm:text-[11px] text-white/35 tabular-nums">{formatTime(currentTime)}</span>
-                  <span className="font-mono text-[10px] sm:text-[11px] text-white/35 tabular-nums">{formatTime(duration)}</span>
-                </div>
-              </div>
+                {/* Volume — hidden on iOS (hardware-only there) */}
+                {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                  <div className="flex items-center gap-3 mt-6">
+                    <i className="fa-solid fa-volume-low text-white/40 text-xs" />
+                    <div className="relative flex-1 h-[6px] bg-white/20 rounded-full">
+                      <div className="absolute left-0 top-0 h-full bg-white/80 rounded-full pointer-events-none"
+                        style={{ width: `${volume * 100}%` }} />
+                      <input type="range" min="0" max="1" step="0.01" value={volume}
+                        onChange={handleVolumeChange} className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                    </div>
+                    <i className="fa-solid fa-volume-high text-white/40 text-xs" />
+                  </div>
+                )}
 
-              {/* ── Divider ── */}
-              <div className="mt-3 sm:mt-4 border-t border-white/10 flex-shrink-0" />
+                {/* Lyrics toggle */}
+                <button onClick={() => setShowLyrics(l => !l)}
+                  className="mx-auto mt-5 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium text-white/70 hover:text-white transition-all"
+                  style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <i className="fa-solid fa-microphone-lines text-[10px]" />
+                  Lyrics
+                  <i className={`fa-solid fa-chevron-down text-[9px] transition-transform duration-300 ${showLyrics ? 'rotate-180' : ''}`} />
+                </button>
 
-              {/* ── Lyrics strip ── */}
-              <AnimatePresence mode="wait">
-                <motion.div key={currentSong.id + '-lyrics'}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  ref={lyricsContainerRef}
-                  className="flex-1 overflow-y-scroll min-h-0 mt-2"
-                  style={{
-                    scrollbarWidth: 'none',
-                    maskImage: 'linear-gradient(to bottom, transparent, white 7%, white 88%, transparent)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, transparent, white 7%, white 88%, transparent)',
-                  }}
-                >
-                  {lyricsLoading ? (
-                    <p className="text-white/30 text-sm pt-12">Loading lyrics…</p>
-                  ) : lyrics.length > 0 ? (
-                    <>
-                      <div style={{ height: '120px', flexShrink: 0 }} />
-                      {lyrics.map((line, idx) => {
-                        const offset = idx - currentLyricIndex;
-                        const abs = Math.abs(offset);
-                        const isCurrent = offset === 0;
-                        return (
-                          <div key={idx} ref={isCurrent ? currentLyricRef : null}
-                            style={{
-                              marginBottom: isCurrent ? '1.7rem' : '1.35rem',
-                              color: isCurrent ? '#fff' : `rgba(255,255,255,${abs === 1 ? 0.5 : abs === 2 ? 0.24 : 0.09})`,
-                              fontSize: isCurrent
-                                ? 'clamp(0.95rem, 2.8vw, 1.65rem)'
-                                : abs <= 1
-                                  ? 'clamp(0.75rem, 1.9vw, 1.12rem)'
-                                  : 'clamp(0.65rem, 1.5vw, 0.95rem)',
-                              fontWeight: isCurrent ? 700 : 400,
-                              lineHeight: 1.38,
-                              letterSpacing: isCurrent ? '-0.01em' : '0',
-                              transition: 'color 0.5s ease, font-size 0.5s ease, font-weight 0.5s ease, letter-spacing 0.5s ease',
-                            }}
-                          >
-                            {line.text}
-                          </div>
-                        );
-                      })}
-                      <div style={{ height: '60vh', flexShrink: 0 }} />
-                    </>
-                  ) : (
-                    <p className="text-white/18 text-sm pt-12">No synced lyrics available</p>
+                {/* Expanding lyrics */}
+                <AnimatePresence>
+                  {showLyrics && (
+                    <motion.div key="lyrics-panel"
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 210, opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                      className="overflow-hidden">
+                      <div ref={lyricsContainerRef}
+                        className="h-[210px] overflow-y-scroll mt-3 text-center"
+                        style={{
+                          scrollbarWidth: 'none',
+                          maskImage: 'linear-gradient(to bottom, transparent, white 12%, white 82%, transparent)',
+                          WebkitMaskImage: 'linear-gradient(to bottom, transparent, white 12%, white 82%, transparent)',
+                        }}>
+                        {lyricsLoading ? (
+                          <p className="text-white/30 text-sm pt-12">Loading lyrics…</p>
+                        ) : lyrics.length > 0 ? (
+                          <>
+                            <div style={{ height: '50px', flexShrink: 0 }} />
+                            {lyrics.map((line, idx) => {
+                              const offset = idx - currentLyricIndex;
+                              const abs = Math.abs(offset);
+                              const isCurrent = offset === 0;
+                              return (
+                                <div key={idx} ref={isCurrent ? currentLyricRef : null}
+                                  style={{
+                                    marginBottom: '0.9rem',
+                                    color: isCurrent ? '#fff' : `rgba(255,255,255,${abs === 1 ? 0.45 : abs === 2 ? 0.22 : 0.1})`,
+                                    fontSize: isCurrent ? '0.95rem' : '0.8rem',
+                                    fontWeight: isCurrent ? 700 : 400,
+                                    lineHeight: 1.4,
+                                    transition: 'color 0.5s ease, font-size 0.5s ease, font-weight 0.5s ease',
+                                  }}>
+                                  {line.text}
+                                </div>
+                              );
+                            })}
+                            <div style={{ height: '140px', flexShrink: 0 }} />
+                          </>
+                        ) : (
+                          <p className="text-white/20 text-sm pt-12">No synced lyrics available</p>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
-                </motion.div>
-              </AnimatePresence>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
           </div>{/* rounded card */}
