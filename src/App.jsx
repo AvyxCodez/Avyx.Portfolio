@@ -983,9 +983,9 @@ function App() {
         
         <div className="group relative flex items-center gap-1 cursor-default">
           <i className="fa-solid fa-location-dot text-xs"></i>
-          <span>Denver</span>
+          <span>{visitorCity}</span>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-0.5 text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap drop-shadow-[0_1px_3px_rgb(0,0,0,0.9)]">
-            Location
+            Your location
           </div>
         </div>
       </div>
