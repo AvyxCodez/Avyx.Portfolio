@@ -502,7 +502,7 @@ function App() {
       setShowProfile(true);
       setStartTyping(true);
       if (audioRef.current) {
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+        audioRef.current.play().catch(() => {});
       }
     }, 350);
   };
@@ -714,6 +714,21 @@ function App() {
     };
   }, [currentSong]);
 
+  // isPlaying mirrors the audio element itself, so UI and sound can never desync
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    return () => {
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+      audio.pause();
+    };
+  }, []);
+
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
@@ -721,9 +736,8 @@ function App() {
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (isPlaying) audio.pause();
-    else audio.play().catch(() => {});
-    setIsPlaying(!isPlaying);
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
   };
 
   const handleSeek = (e) => {
@@ -737,7 +751,7 @@ function App() {
     const next = songs[(i + 1) % songs.length];
     setCurrentSong(next);
     setTimeout(() => {
-      if (audioRef.current) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      if (audioRef.current) audioRef.current.play().catch(() => {});
     }, 80);
   };
 
@@ -746,7 +760,7 @@ function App() {
     const prev = songs[(i - 1 + songs.length) % songs.length];
     setCurrentSong(prev);
     setTimeout(() => {
-      if (audioRef.current) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      if (audioRef.current) audioRef.current.play().catch(() => {});
     }, 80);
   };
 
