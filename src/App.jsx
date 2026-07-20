@@ -262,6 +262,22 @@ const formatClock = (date) => date.toLocaleTimeString('en-US', {
   hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
 });
 
+// Visitor's own timezone — the clock already ticks in their local time
+const visitorTimeZone = (() => {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; }
+})();
+const visitorCity = visitorTimeZone.includes('/')
+  ? visitorTimeZone.split('/').pop().replace(/_/g, ' ')
+  : (visitorTimeZone || 'Local time');
+const visitorGmt = (() => {
+  const off = -new Date().getTimezoneOffset();
+  const sign = off >= 0 ? '+' : '−';
+  const abs = Math.abs(off);
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+  return `GMT${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
+})();
+
 const formatTime = (t) => {
   const m = Math.floor(t / 60);
   const s = Math.floor(t % 60);
@@ -1223,7 +1239,7 @@ function App() {
                 {/* Clock */}
                 <div className="flex-shrink-0 text-right lg:text-center">
                   <div className="font-mono text-lg lg:text-2xl font-semibold text-white tabular-nums leading-none">{formatClock(clockTime)}</div>
-                  <p className="font-mono text-[10px] text-white/30 mt-1">GMT−7 · Denver</p>
+                  <p className="font-mono text-[10px] text-white/30 mt-1">{visitorGmt} · {visitorCity}</p>
                 </div>
 
                 <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
