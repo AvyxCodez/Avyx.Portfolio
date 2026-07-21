@@ -121,7 +121,8 @@ const SITE_CONFIG = {
   username: "Avyx",
   displayName: "A V Y X",
   bio: "Developer & programmer. Working at Amazon Robotics.",
-  pfp: "https://media.discordapp.net/attachments/1233881503923179572/1514388105564651590/IMG_3924.jpg?ex=6a2d2994&is=6a2bd814&hm=e33de4bcd7e93bfbd740b2e07a82fd9ca6d8aaa45b971750a7c37b0d71663163&=&format=webp&width=544&height=544",
+  // Stable fallback while the live Discord avatar loads (attachment links expire)
+  pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
   bgType: "image",
   bgValue: "https://files.catbox.moe/xotlnd.jpg",
   audioLoop: true,
@@ -785,24 +786,29 @@ function App() {
   const [discordBadges, setDiscordBadges] = useState([]);
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+    const load = async (attempt = 0) => {
       try {
         const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
         const data = await res.json();
-        if (data.success) {
-          const { id, avatar, public_flags, premium_type } = data.data.discord_user;
-          if (avatar) setDiscordAvatar(`https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`);
-          setDiscordStatus(data.data.discord_status || 'offline');
-          const badges = [];
-          if (premium_type && premium_type > 0) badges.push({ icon: 'nitro', label: 'Nitro' });
-          BADGE_FLAGS.forEach(({ flag, icon, label }) => {
-            if (public_flags & flag) badges.push({ icon, label });
-          });
-          badges.push({ icon: 'quest', label: 'Completed a Quest' });
-          setDiscordBadges(badges);
-        }
-      } catch {}
-    })();
+        if (!data.success) throw new Error('lanyard unavailable');
+        if (cancelled) return;
+        const { id, avatar, public_flags, premium_type } = data.data.discord_user;
+        if (avatar) setDiscordAvatar(`https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`);
+        setDiscordStatus(data.data.discord_status || 'offline');
+        const badges = [];
+        if (premium_type && premium_type > 0) badges.push({ icon: 'nitro', label: 'Nitro' });
+        BADGE_FLAGS.forEach(({ flag, icon, label }) => {
+          if (public_flags & flag) badges.push({ icon, label });
+        });
+        badges.push({ icon: 'quest', label: 'Completed a Quest' });
+        setDiscordBadges(badges);
+      } catch {
+        if (!cancelled && attempt < 3) setTimeout(() => load(attempt + 1), 2500);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
 
 
