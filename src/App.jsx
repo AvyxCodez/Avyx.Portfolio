@@ -130,7 +130,7 @@ const SITE_CONFIG = {
 
 const DISCORD_USER_ID = "825785012468056155";
 
-const ACCENT = "#6366f1";
+const ACCENT = "#ef4444";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
@@ -171,7 +171,7 @@ const projects = [
     tags: ['File Sharing', 'No Signup', '200MB Limit', 'Self-Destruct Uploads'],
     url: 'https://lumora-io-production.up.railway.app/',
     icon: 'fa-solid fa-link',
-    color: '#8b5cf6',
+    color: '#ef4444',
   },
 ];
 
