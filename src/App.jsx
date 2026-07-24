@@ -140,7 +140,7 @@ const songs = [
     title: "Exit Music",
     artist: "Radiohead",
     url: "https://files.catbox.moe/g76a4s.mp3",
-    albumArt: "https://files.catbox.moe/9vx49d.jpeg",
+    albumArt: "/art-exit-music.jpeg",
   },
 
   {
@@ -148,7 +148,7 @@ const songs = [
     title: "Runaway",
     artist: "Kanye West",
     url: "https://files.catbox.moe/xi05wx.mp3",
-    albumArt: "https://cdn-images.dzcdn.net/images/cover/742aba8510ba803bea51d304cf2ca786/1900x1900-000000-81-0-0.jpg",
+    albumArt: "/art-runaway.jpg",
   },
 
   {
@@ -156,7 +156,7 @@ const songs = [
     title: "Young Forever",
     artist: "JAY-Z, Mr Hudson",
     url: "https://files.catbox.moe/i8xbc8.mp3",
-    albumArt: "https://i1.sndcdn.com/artworks-kzDzE3qFgu6M-0-t500x500.jpg",
+    albumArt: "/art-young-forever.jpg",
   },
 ];
 
