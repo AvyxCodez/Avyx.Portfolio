@@ -1032,22 +1032,8 @@ function App() {
             onMouseLeave={handleMouseLeave}
             style={{ transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
           >
-            {/* Spinning gradient border */}
-            <div className="absolute -inset-[1px] rounded-[28px] overflow-hidden pointer-events-none">
-              <div style={{
-                position: 'absolute', inset: '-100%',
-                background: `conic-gradient(from 0deg, transparent 320deg, ${ACCENT}99 348deg, rgba(255,255,255,0.5) 355deg, transparent 360deg)`,
-                animation: 'borderSpin 4s linear infinite',
-                transformOrigin: 'center center'
-              }} />
-            </div>
-
-            {/* Glass card */}
-            <div className="relative rounded-[27px] bg-white/[0.04] backdrop-blur-3xl border border-white/[0.07] overflow-hidden">
-
-              {/* Ambient glow top */}
-              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-48 bg-white/5 blur-3xl rounded-full pointer-events-none" />
-
+            {/* Boxless — content floats directly on the scene */}
+            <div className="relative">
               <div className="relative z-10 p-6 sm:p-8">
 
                 {/* Avatar */}
@@ -1172,7 +1158,7 @@ function App() {
 
           {/* World clock — my time + visitor delta */}
           <div className={`w-full max-w-[330px] sm:max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
+            <div className="flex items-center justify-center gap-4 px-4 py-3.5">
 
               {/* Analog face — visitor's local time */}
               <div className="relative w-14 h-14 flex-shrink-0 rounded-full"
