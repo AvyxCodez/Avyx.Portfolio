@@ -854,7 +854,7 @@ function App() {
 
         @keyframes nameGlow {
           0%, 15%, 75%, 100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
-          40% { filter: drop-shadow(0 0 16px rgba(255,255,255,0.5)); }
+          40% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.55)); }
         }
       `}</style>
 
