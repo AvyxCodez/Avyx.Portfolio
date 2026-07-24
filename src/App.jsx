@@ -1184,9 +1184,15 @@ function App() {
 
           {/* Scroll indicator */}
           <button onClick={() => scrollToSection(1)}
-            className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 transition-opacity duration-700 delay-500 ${showProfile ? 'opacity-100' : 'opacity-0'}`}>
-            <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/30">Scroll for more</span>
-            <i className="fa-solid fa-chevron-down text-xs animate-bounce" style={{ color: `${ACCENT}cc` }} />
+            className={`absolute bottom-6 left-1/2 -translate-x-1/2 transition-opacity duration-700 delay-500 ${showProfile ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="flex flex-col items-center gap-1.5" style={{ animation: 'float 3s ease-in-out infinite' }}>
+              <span className="font-mono text-[10px] tracking-[3px] uppercase text-white/80"
+                style={{ textShadow: '0 0 10px rgba(255,255,255,0.4), 0 0 24px rgba(255,255,255,0.15)' }}>
+                Scroll for more
+              </span>
+              <i className="fa-solid fa-chevron-down text-sm animate-bounce"
+                style={{ color: ACCENT, filter: `drop-shadow(0 0 6px ${ACCENT}aa)` }} />
+            </div>
           </button>
         </div>
 
