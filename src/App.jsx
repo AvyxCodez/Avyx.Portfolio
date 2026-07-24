@@ -846,6 +846,16 @@ function App() {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-6px); }
         }
+
+        @keyframes nameShine {
+          0% { background-position: 200% center; }
+          55%, 100% { background-position: -200% center; }
+        }
+
+        @keyframes nameGlow {
+          0%, 15%, 75%, 100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
+          40% { filter: drop-shadow(0 0 16px rgba(255,255,255,0.5)); }
+        }
       `}</style>
 
       <canvas id="canvas" className="fixed inset-0 z-[9997] pointer-events-none" />
@@ -1071,7 +1081,14 @@ function App() {
 
                 {/* Name */}
                 <h1 className="text-center text-[2.1rem] font-bold tracking-tight mb-3"
-                  style={{ background: 'linear-gradient(160deg,#fff 30%,rgba(255,255,255,0.55))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  style={{
+                    backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
+                    backgroundSize: '250% 100%',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    animation: 'nameShine 5s ease-in-out infinite, nameGlow 5s ease-in-out infinite',
+                  }}>
                   {SITE_CONFIG.username}
                 </h1>
 
