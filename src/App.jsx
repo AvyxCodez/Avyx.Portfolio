@@ -259,25 +259,35 @@ const BADGE_FLAGS = [
   { flag: 4194304, icon: 'active-developer',         label: 'Active Developer' },
 ];
 
-const formatClock = (date) => date.toLocaleTimeString('en-US', {
-  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-});
-
-// Visitor's own timezone — the clock already ticks in their local time
+// Visitor's own timezone — used for the location badge and clock delta
 const visitorTimeZone = (() => {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; }
 })();
 const visitorCity = visitorTimeZone.includes('/')
   ? visitorTimeZone.split('/').pop().replace(/_/g, ' ')
   : (visitorTimeZone || 'Local time');
-const visitorGmt = (() => {
-  const off = -new Date().getTimezoneOffset();
-  const sign = off >= 0 ? '+' : '−';
-  const abs = Math.abs(off);
+// Owner clock — my timezone, shown on the profile page with the visitor's delta
+const OWNER_TZ = 'America/Denver';
+
+const tzOffsetMinutes = (tz, d) => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour12: false,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(d).map(p => [p.type, p.value])
+  );
+  const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour % 24, +parts.minute, +parts.second);
+  return Math.round((asUTC - d.getTime()) / 60000);
+};
+
+const formatGmt = (offMin) => {
+  const sign = offMin >= 0 ? '+' : '−';
+  const abs = Math.abs(offMin);
   const h = Math.floor(abs / 60);
   const m = abs % 60;
   return `GMT${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
-})();
+};
 
 const formatTime = (t) => {
   const m = Math.floor(t / 60);
@@ -851,7 +861,27 @@ function App() {
 
   useCanvasCursor();
 
-  
+  // Owner clock (Denver) + visitor delta, recomputed each tick
+  const ownerParts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: OWNER_TZ, hour12: false,
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(clockTime).map(p => [p.type, p.value])
+  );
+  const ownerH = +ownerParts.hour % 24;
+  const ownerM = +ownerParts.minute;
+  const ownerS = +ownerParts.second;
+  const ownerTimeStr = `${String(ownerH).padStart(2, '0')}:${ownerParts.minute}:${ownerParts.second}`;
+  const ownerDateStr = `${ownerParts.weekday}, ${ownerParts.month} ${ownerParts.day}`;
+  const ownerGmt = formatGmt(tzOffsetMinutes(OWNER_TZ, clockTime));
+  const visitorTime12 = clockTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  const tzDiffH = (-clockTime.getTimezoneOffset() - tzOffsetMinutes(OWNER_TZ, clockTime)) / 60;
+  const tzDiffLabel = tzDiffH === 0
+    ? 'same time'
+    : `${tzDiffH > 0 ? '+' : '−'}${Math.abs(tzDiffH) % 1 === 0 ? Math.abs(tzDiffH) : Math.abs(tzDiffH).toFixed(1)}h`;
+
+
 
   return (
     <div 
@@ -1201,6 +1231,34 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* World clock — my time + visitor delta */}
+          <div className={`w-full max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
+
+              {/* Analog face — Denver time */}
+              <div className="relative w-12 h-12 flex-shrink-0 rounded-full border border-white/20 bg-white/[0.05]">
+                <span className="absolute left-1/2 top-1/2 w-[2px] h-[13px] bg-white/85 rounded-full"
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(ownerH % 12) * 30 + ownerM * 0.5}deg)` }} />
+                <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[18px] bg-white/60 rounded-full"
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerM * 6 + ownerS * 0.1}deg)` }} />
+                <span className="absolute left-1/2 top-1/2 w-px h-[19px] rounded-full"
+                  style={{ background: ACCENT, transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerS * 6}deg)` }} />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[4px] rounded-full bg-white" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
+                  <i className="fa-regular fa-clock text-[9px]" /> {OWNER_TZ}
+                </p>
+                <p className="font-mono text-xl font-semibold text-white tabular-nums leading-tight">{ownerTimeStr}</p>
+                <p className="font-mono text-[11px] text-white/40">{ownerDateStr} · {ownerGmt}</p>
+                <p className="font-mono text-[11px] mt-0.5" style={{ color: `${ACCENT}dd` }}>
+                  Your time: {visitorTime12} ({tzDiffLabel})
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* PAGE 2 — About Me (sidebar identity rail + content column) */}
@@ -1238,14 +1296,6 @@ function App() {
                   }`}>
                     {discordStatus === 'online' ? '● Online' : discordStatus === 'idle' ? '● Idle' : discordStatus === 'dnd' ? '● Do Not Disturb' : '● Offline'}
                   </p>
-                </div>
-
-                <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
-
-                {/* Clock */}
-                <div className="flex-shrink-0 text-right lg:text-center">
-                  <div className="font-mono text-lg lg:text-2xl font-semibold text-white tabular-nums leading-none">{formatClock(clockTime)}</div>
-                  <p className="font-mono text-[10px] text-white/30 mt-1">{visitorGmt} · {visitorCity}</p>
                 </div>
 
                 <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
