@@ -132,7 +132,7 @@ const ACCENT = "#60a5fa";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-const fadeTexts = ["Welcome", "Developer", "WebDev", "Scroll for more!"];
+const fadeTexts = ["Welcome", "Developer", "WebDev"];
 
 const songs = [
   {
