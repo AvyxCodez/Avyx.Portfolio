@@ -118,7 +118,7 @@ function DiscordBadgeIcon({ icon }) {
 }
 
 const SITE_CONFIG = {
-  username: "Avyx",
+  username: "AvyxCodez",
   // Stable fallback while the live Discord avatar loads (attachment links expire)
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
   bgType: "image",
@@ -1087,7 +1087,7 @@ function App() {
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    animation: 'nameShine 8s ease-in-out infinite, nameGlow 8s ease-in-out infinite',
+                    animation: 'nameShine 12s ease-in-out infinite, nameGlow 12s ease-in-out infinite',
                   }}>
                   {SITE_CONFIG.username}
                 </h1>
