@@ -132,7 +132,6 @@ const ACCENT = "#dc2626";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-const fadeTexts = ["Welcome", "Developer", "WebDev", "Scroll for more!"];
 
 const songs = [
   {
@@ -362,22 +361,6 @@ function App() {
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0 });
   };
-
-  const [currentFadeIndex, setCurrentFadeIndex] = useState(0);
-  const [fadeVisible, setFadeVisible] = useState(true);
-
-  useEffect(() => {
-    const cycleText = () => {
-      setFadeVisible(false);
-      setTimeout(() => {
-        setCurrentFadeIndex((prev) => (prev + 1) % fadeTexts.length);
-        setFadeVisible(true);
-      }, 500);
-    };
-
-    const interval = setInterval(cycleText, 3500);
-    return () => clearInterval(interval);
-  }, []);
 
   // Fade in effects
   useEffect(() => {
@@ -815,6 +798,8 @@ function App() {
       
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap');
+
         html, body, .snap-container {
           cursor: none !important;
         }
@@ -959,6 +944,10 @@ function App() {
             Your location
           </div>
         </div>
+
+        <span className="text-white/40">•</span>
+
+        <span className="font-mono text-[10px] uppercase tracking-[2px] text-white/45">Developer &amp; Programmer</span>
       </div>
 
       {/* Preloader */}
@@ -1036,166 +1025,107 @@ function App() {
         {/* PAGE 1 - Profile Card */}
         <div className="snap-section relative min-h-screen flex flex-col items-center justify-center px-6">
           <div
-            className={`relative w-full max-w-[400px] transition-all duration-700 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+            className={`relative w-full max-w-[400px] flex flex-col items-center transition-all duration-700 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
           >
-            {/* Spinning gradient border */}
-            <div className="absolute -inset-[1px] rounded-[28px] overflow-hidden pointer-events-none">
-              <div style={{
-                position: 'absolute', inset: '-100%',
-                background: `conic-gradient(from 0deg, transparent 320deg, ${ACCENT}99 348deg, rgba(255,255,255,0.5) 355deg, transparent 360deg)`,
-                animation: 'borderSpin 4s linear infinite',
-                transformOrigin: 'center center'
-              }} />
+            {/* Avatar */}
+            <div className="relative mb-2.5" style={{ animation: 'float 4s ease-in-out infinite' }}>
+              <div className="w-[72px] h-[72px] rounded-2xl overflow-hidden ring-1 ring-white/15 shadow-2xl">
+                <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
+              </div>
+              <div className={`absolute -bottom-1 -right-1 w-[14px] h-[14px] rounded-full border-2 border-black shadow-lg ${
+                discordStatus === 'online' ? 'bg-emerald-400 shadow-emerald-400/60' :
+                discordStatus === 'idle'   ? 'bg-yellow-400 shadow-yellow-400/60' :
+                discordStatus === 'dnd'    ? 'bg-red-500 shadow-red-500/60' :
+                                             'bg-zinc-500'
+              }`} />
             </div>
 
-            {/* Glass card */}
-            <div className="relative rounded-[27px] bg-white/[0.04] backdrop-blur-3xl border border-white/[0.07] overflow-hidden">
+            {/* Tag pill */}
+            <div className="mb-4 px-2.5 py-1 rounded-md font-mono text-[9px] tracking-[2px] text-white/60"
+              style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              AVY.JS
+            </div>
 
-              {/* Ambient glow top */}
-              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-48 bg-white/5 blur-3xl rounded-full pointer-events-none" />
+            {/* Name — serif small caps, shine + glow */}
+            <h1 className="text-center text-[26px] uppercase mb-3"
+              style={{
+                fontFamily: "'Cinzel', serif",
+                fontWeight: 500,
+                letterSpacing: '0.28em',
+                marginRight: '-0.28em',
+                backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
+                backgroundSize: '250% 100%',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                animation: 'nameShine 12s ease-in-out infinite, nameGlow 12s ease-in-out infinite',
+              }}>
+              {SITE_CONFIG.username}
+            </h1>
 
-              <div className="relative z-10 p-8">
-
-                {/* Avatar */}
-                <div className="flex justify-center mb-6" style={{ animation: 'float 4s ease-in-out infinite' }}>
-                  <div className="relative">
-                    {/* Gradient ring */}
-                    <div className="relative w-[108px] h-[108px] rounded-full p-[2.5px]"
-                      style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
-                      <div className="w-full h-full rounded-full overflow-hidden">
-                        <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
-                      </div>
+            {/* Discord badges */}
+            {discordBadges.length > 0 && (
+              <div className="flex justify-center gap-2.5 mb-5">
+                {discordBadges.map((badge) => (
+                  <div key={badge.icon} className="relative group flex items-center justify-center">
+                    <span
+                      className="inline-block w-4 h-4 transition-all duration-200 group-hover:scale-125"
+                      style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' }}
+                    >
+                      <DiscordBadgeIcon icon={badge.icon} />
+                    </span>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 backdrop-blur-sm border border-white/10 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                      {badge.label}
                     </div>
-                    {/* Status dot */}
-                    <div className={`absolute bottom-1 right-1 w-[18px] h-[18px] rounded-full border-[2.5px] border-[#080808] shadow-lg ${
-                      discordStatus === 'online' ? 'bg-emerald-400 shadow-emerald-400/60' :
-                      discordStatus === 'idle'   ? 'bg-yellow-400 shadow-yellow-400/60' :
-                      discordStatus === 'dnd'    ? 'bg-red-500 shadow-red-500/60' :
-                                                   'bg-zinc-500'
-                    }`} />
                   </div>
-                </div>
-
-                {/* Name */}
-                <h1 className="text-center text-[2.1rem] font-bold tracking-tight mb-3"
-                  style={{
-                    backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
-                    backgroundSize: '250% 100%',
-                    WebkitBackgroundClip: 'text',
-                    backgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    animation: 'nameShine 12s ease-in-out infinite, nameGlow 12s ease-in-out infinite',
-                  }}>
-                  {SITE_CONFIG.username}
-                </h1>
-
-                {/* Discord badges */}
-                {discordBadges.length > 0 && (
-                  <div className="flex justify-center gap-3 mb-4">
-                    {discordBadges.map((badge) => (
-                      <div key={badge.icon} className="relative group flex items-center justify-center">
-                        <span
-                          className="inline-block w-5 h-5 transition-all duration-200 group-hover:scale-125"
-                          style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.55))' }}
-                          onMouseEnter={e => e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.95))'}
-                          onMouseLeave={e => e.currentTarget.style.filter = 'drop-shadow(0 0 4px rgba(255,255,255,0.55))'}
-                        >
-                          <DiscordBadgeIcon icon={badge.icon} />
-                        </span>
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 backdrop-blur-sm border border-white/10 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
-                          {badge.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Chips row */}
-                <div className="flex items-center justify-center gap-2 flex-wrap mb-5">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
-                    <i className="fa-solid fa-code text-[8px]" /> Developer
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
-                    <i className="fa-solid fa-location-dot text-[8px]" /> Denver
-                  </span>
-                  <span className={`inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full border ${
-                    discordStatus === 'online' ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' :
-                    discordStatus === 'idle'   ? 'bg-yellow-500/10 border-yellow-500/25 text-yellow-400' :
-                    discordStatus === 'dnd'    ? 'bg-red-500/10 border-red-500/25 text-red-400' :
-                                                 'bg-white/5 border-white/10 text-white/35'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full inline-block ${
-                      discordStatus === 'online' ? 'bg-emerald-400' :
-                      discordStatus === 'idle'   ? 'bg-yellow-400' :
-                      discordStatus === 'dnd'    ? 'bg-red-400' : 'bg-zinc-500'
-                    }`} />
-                    {discordStatus === 'online' ? 'Online' : discordStatus === 'idle' ? 'Idle' : discordStatus === 'dnd' ? 'Do Not Disturb' : 'Offline'}
-                  </span>
-                </div>
-
-                {/* Cycling text */}
-                <div className="h-5 flex items-center justify-center mb-6">
-                  <span className={`text-[11px] tracking-[4px] uppercase transition-opacity duration-500 ${fadeVisible ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ color: `${ACCENT}bb` }}>
-                    {fadeTexts[currentFadeIndex]}
-                  </span>
-                </div>
-
-                {/* Gradient divider */}
-                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
-
-                {/* Social icons */}
-                <div className="flex justify-center gap-3">
-                  <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <i className="fa-brands fa-discord" />
-                  </a>
-                  <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <i className="fa-brands fa-x-twitter" />
-                  </a>
-                  <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <svg viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <polygon points="50,2 93,26 93,74 50,98 7,74 7,26" />
-                      <text x="50" y="66" textAnchor="middle" fontFamily="Arial Black,sans-serif" fontWeight="900" fontSize="38" fill="#000">cfx</text>
-                    </svg>
-                  </a>
-                  <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <i className="fa-brands fa-instagram" />
-                  </a>
-                </div>
-
+                ))}
               </div>
+            )}
+
+            {/* Social icons — bare, tight */}
+            <div className="flex justify-center items-center gap-4 text-[17px]">
+              <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer"
+                className="text-white/75 transition-all duration-200 hover:text-white hover:scale-125"
+                style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.35))' }}>
+                <i className="fa-brands fa-discord" />
+              </a>
+              <a href="#"
+                className="text-white/75 transition-all duration-200 hover:text-white hover:scale-125"
+                style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.35))' }}>
+                <i className="fa-brands fa-x-twitter" />
+              </a>
+              <a href="#"
+                className="text-white/75 transition-all duration-200 hover:text-white hover:scale-125 flex items-center"
+                style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.35))' }}>
+                <svg viewBox="0 0 100 100" width="0.9em" height="0.9em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="50,2 93,26 93,74 50,98 7,74 7,26" />
+                  <text x="50" y="66" textAnchor="middle" fontFamily="Arial Black,sans-serif" fontWeight="900" fontSize="38" fill="#000">cfx</text>
+                </svg>
+              </a>
+              <a href="#"
+                className="text-white/75 transition-all duration-200 hover:text-white hover:scale-125"
+                style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.35))' }}>
+                <i className="fa-brands fa-instagram" />
+              </a>
             </div>
-          </div>
 
-          {/* World clock — my time + visitor delta */}
-          <div className={`w-full max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
-
-              {/* Analog face — visitor's local time */}
-              <div className="relative w-12 h-12 flex-shrink-0 rounded-full border border-white/20 bg-white/[0.05]">
-                <span className="absolute left-1/2 top-1/2 w-[2px] h-[13px] bg-white/85 rounded-full"
+            {/* Clock — boxless inline */}
+            <div className={`mt-6 flex items-center gap-2.5 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="relative w-8 h-8 flex-shrink-0 rounded-full border border-white/20 bg-white/[0.04]">
+                <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[8px] bg-white/85 rounded-full"
                   style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(localH % 12) * 30 + localM * 0.5}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[18px] bg-white/60 rounded-full"
+                <span className="absolute left-1/2 top-1/2 w-px h-[11px] bg-white/60 rounded-full"
                   style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localM * 6 + localS * 0.1}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 w-px h-[19px] rounded-full"
+                <span className="absolute left-1/2 top-1/2 w-px h-[12px] rounded-full"
                   style={{ background: ACCENT, transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localS * 6}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[4px] rounded-full bg-white" />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[3px] h-[3px] rounded-full bg-white" />
               </div>
-
-              <div className="min-w-0">
-                <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
-                  <i className="fa-regular fa-clock text-[9px]" /> {visitorTimeZone || 'Local time'}
-                </p>
-                <p className="font-mono text-xl font-semibold text-white tabular-nums leading-tight">{localTimeStr}</p>
-                <p className="font-mono text-[11px] text-white/40">{localDateStr} · {localGmt}</p>
-              </div>
+              <p className="font-mono text-[11px] text-white/50 tabular-nums">
+                {localTimeStr} <span className="text-white/25">· {localGmt} · {visitorTimeZone || 'Local time'}</span>
+              </p>
             </div>
           </div>
 
