@@ -139,7 +139,7 @@ const songs = [
     id: 1,
     title: "Exit Music",
     artist: "Radiohead",
-    url: "https://files.catbox.moe/g76a4s.mp3",
+    url: "https://lumora-io.vercel.app/f/JUFbTc.mp3",
     albumArt: "/art-exit-music.jpeg",
   },
 
@@ -147,7 +147,7 @@ const songs = [
     id: 2,
     title: "Runaway",
     artist: "Kanye West",
-    url: "https://files.catbox.moe/xi05wx.mp3",
+    url: "https://lumora-io.vercel.app/f/bArxSo.mp3",
     albumArt: "/art-runaway.jpg",
   },
 
@@ -155,7 +155,7 @@ const songs = [
     id: 3,
     title: "Young Forever",
     artist: "JAY-Z, Mr Hudson",
-    url: "https://files.catbox.moe/i8xbc8.mp3",
+    url: "https://lumora-io.vercel.app/f/SBwQje.mp3",
     albumArt: "/art-young-forever.jpg",
   },
 ];
