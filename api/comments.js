@@ -1,6 +1,7 @@
 // Comments API backed by Vercel/Upstash Redis (REST).
-// GET  /api/comments        -> { comments: [...] }
-// POST /api/comments {name, message} -> { comment }
+// GET    /api/comments                 -> { comments: [...] }
+// POST   /api/comments {name, message} -> { comment }
+// DELETE /api/comments?id=<id>         -> { deleted } (requires x-admin-key header matching ADMIN_KEY env)
 
 const store = () => {
   const env = process.env;
@@ -56,6 +57,22 @@ export default async function handler(req, res) {
       await cmd(s, ['LPUSH', 'comments', JSON.stringify(comment)]);
       await cmd(s, ['LTRIM', 'comments', '0', '499']);
       return res.status(201).json({ comment });
+    }
+
+    if (req.method === 'DELETE') {
+      const adminKey = process.env.ADMIN_KEY;
+      if (!adminKey) return res.status(501).json({ error: 'Moderation not configured' });
+      if (req.headers['x-admin-key'] !== adminKey) return res.status(401).json({ error: 'Invalid admin key' });
+
+      const id = String(req.query.id || '');
+      if (!id) return res.status(400).json({ error: 'id required' });
+
+      // Find the exact stored string for this id, then remove that one entry
+      const raw = (await cmd(s, ['LRANGE', 'comments', '0', '499'])) || [];
+      const target = raw.find((x) => { try { return JSON.parse(x).id === id; } catch { return false; } });
+      if (!target) return res.status(404).json({ error: 'Comment not found' });
+      await cmd(s, ['LREM', 'comments', '1', target]);
+      return res.json({ deleted: id });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

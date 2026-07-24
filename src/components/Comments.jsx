@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Local dev has no serverless functions — fall back to localStorage
@@ -44,6 +44,54 @@ export default function Comments() {
   const [message, setMessage]       = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
+
+  // Moderation — unlocked by triple-clicking the note counter in the header
+  const [adminKey, setAdminKey] = useState(() => localStorage.getItem('avyx-admin-key') || '');
+  const modClicks = useRef({ n: 0, t: 0 });
+
+  const handleModTap = () => {
+    const now = Date.now();
+    if (now - modClicks.current.t > 1500) modClicks.current.n = 0;
+    modClicks.current = { n: modClicks.current.n + 1, t: now };
+    if (modClicks.current.n < 3) return;
+    modClicks.current.n = 0;
+    if (adminKey) {
+      if (window.confirm('Turn off moderation on this device?')) {
+        localStorage.removeItem('avyx-admin-key');
+        setAdminKey('');
+      }
+      return;
+    }
+    const k = window.prompt('Admin key:');
+    if (k) {
+      localStorage.setItem('avyx-admin-key', k);
+      setAdminKey(k);
+    }
+  };
+
+  const deleteComment = async (id) => {
+    if (IS_DEV) {
+      const next = devRead().filter(c => c.id !== id);
+      devWrite(next);
+      setComments(next);
+      return;
+    }
+    try {
+      const r = await fetch(`/api/comments?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { 'x-admin-key': adminKey },
+      });
+      if (r.status === 401) {
+        localStorage.removeItem('avyx-admin-key');
+        setAdminKey('');
+        setError('Wrong admin key — moderation locked again.');
+        setShowForm(true);
+        return;
+      }
+      if (!r.ok) return;
+      setComments(prev => prev.filter(c => c.id !== id));
+    } catch {}
+  };
 
   const sorted = newest ? [...comments] : [...comments].reverse();
 
@@ -122,8 +170,8 @@ export default function Comments() {
           </div>
           <div>
             <p className="text-sm font-semibold text-white leading-none">Comments</p>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              {comments.length} {comments.length === 1 ? 'note' : 'notes'}
+            <p onClick={handleModTap} className="text-[10px] font-mono mt-0.5 select-none" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {comments.length} {comments.length === 1 ? 'note' : 'notes'}{adminKey ? ' · mod' : ''}
             </p>
           </div>
         </div>
@@ -235,6 +283,13 @@ export default function Comments() {
                     <span className="text-[10px] font-mono flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       {formatDate(c.created_at)}
                     </span>
+                    {adminKey && (
+                      <button onClick={() => deleteComment(c.id)} title="Delete comment"
+                        className="flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-all hover:bg-red-500/20"
+                        style={{ color: 'rgba(248,113,113,0.7)' }}>
+                        <i className="fa-solid fa-trash text-[9px]" />
+                      </button>
+                    )}
                   </div>
                   <p className="text-[13px] leading-relaxed break-words" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {c.message}
