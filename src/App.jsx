@@ -121,8 +121,8 @@ const SITE_CONFIG = {
   username: "AvyxCodez",
   // Stable fallback while the live Discord avatar loads (attachment links expire)
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
-  bgType: "image",
-  bgValue: "https://files.catbox.moe/xotlnd.jpg",
+  bgType: "gif",
+  bgValue: "/background.gif",
   audioLoop: true,
 };
 
