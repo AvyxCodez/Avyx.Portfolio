@@ -119,8 +119,6 @@ function DiscordBadgeIcon({ icon }) {
 
 const SITE_CONFIG = {
   username: "Avyx",
-  displayName: "A V Y X",
-  bio: "Developer & programmer. Working at Amazon Robotics.",
   // Stable fallback while the live Discord avatar loads (attachment links expire)
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
   bgType: "image",
@@ -416,33 +414,7 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Album Color
-  const [albumColor, setAlbumColor] = useState("#1a1a1a");
-  const extractDominantColor = (imageUrl) => {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = imageUrl;
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      canvas.width = 50; canvas.height = 50;
-      ctx.drawImage(img, 0, 0, 50, 50);
-      const data = ctx.getImageData(0, 0, 50, 50).data;
-      let r = 0, g = 0, b = 0;
-      for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i+1]; b += data[i+2]; }
-      const count = data.length / 4;
-      setAlbumColor(`rgb(${Math.floor(r/count)}, ${Math.floor(g/count)}, ${Math.floor(b/count)})`);
-    };
-  };
-
   // View Counter + Location
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
   const [views, setViews] = useState(null);
   const [displayViews, setDisplayViews] = useState(0);
 
@@ -499,12 +471,6 @@ function App() {
     window.addEventListener('mousemove', move);
     return () => window.removeEventListener('mousemove', move);
   }, []);
-  // Typewriter Bio
-  const [displayedBio, setDisplayedBio] = useState("");
-  const [isDeletingBio, setIsDeletingBio] = useState(false);
-  const [startTyping, setStartTyping] = useState(false);
-  const fullBio = SITE_CONFIG.bio;
-
   const enterSite = () => {
     setShowEnter(false);
     incrementViews();
@@ -512,24 +478,11 @@ function App() {
 
     setTimeout(() => {
       setShowProfile(true);
-      setStartTyping(true);
       if (audioRef.current) {
         audioRef.current.play().catch(() => {});
       }
     }, 350);
   };
-
-  useEffect(() => {
-    if (!startTyping) return;
-    const handle = () => {
-      const current = fullBio.substring(0, isDeletingBio ? displayedBio.length - 1 : displayedBio.length + 1);
-      setDisplayedBio(current);
-      if (!isDeletingBio && current === fullBio) setTimeout(() => setIsDeletingBio(true), 2200);
-      else if (isDeletingBio && current === "") setIsDeletingBio(false);
-    };
-    const t = setTimeout(handle, isDeletingBio ? 90 : 170);
-    return () => clearTimeout(t);
-  }, [displayedBio, isDeletingBio, startTyping]);
 
   const [currentSong, setCurrentSong] = useState(songs[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -710,7 +663,6 @@ function App() {
     setIsPlaying(false);
     setCurrentTime(0);
     setCurrentLyricIndex(0);
-    extractDominantColor(currentSong.albumArt);
   }, [currentSong]);
 
   useEffect(() => {
