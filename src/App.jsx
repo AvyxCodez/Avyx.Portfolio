@@ -1179,14 +1179,44 @@ function App() {
             <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
 
               {/* Analog face — visitor's local time */}
-              <div className="relative w-12 h-12 flex-shrink-0 rounded-full border border-white/20 bg-white/[0.05]">
-                <span className="absolute left-1/2 top-1/2 w-[2px] h-[13px] bg-white/85 rounded-full"
-                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(localH % 12) * 30 + localM * 0.5}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[18px] bg-white/60 rounded-full"
-                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localM * 6 + localS * 0.1}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 w-px h-[19px] rounded-full"
-                  style={{ background: ACCENT, transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localS * 6}deg)` }} />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[4px] rounded-full bg-white" />
+              <div className="relative w-14 h-14 flex-shrink-0 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1), rgba(8,12,24,0.95) 72%)',
+                  border: '2px solid rgba(255,255,255,0.22)',
+                  boxShadow: 'inset 0 0 10px rgba(0,0,0,0.65), 0 2px 10px rgba(0,0,0,0.45)',
+                }}>
+
+                {/* Hour ticks (skip the cardinal points — numerals live there) */}
+                {Array.from({ length: 12 }).map((_, i) => (
+                  i % 3 !== 0 && (
+                    <span key={i} className="absolute left-1/2 top-1/2 w-px h-[3px] rounded-full"
+                      style={{
+                        background: 'rgba(255,255,255,0.4)',
+                        transform: `translate(-50%, -50%) rotate(${i * 30}deg) translateY(-22px)`,
+                      }} />
+                  )
+                ))}
+
+                {/* Numerals */}
+                {[['12', '50%', '15%'], ['3', '84%', '50%'], ['6', '50%', '85%'], ['9', '16%', '50%']].map(([n, x, y]) => (
+                  <span key={n} className="absolute font-mono text-white/75"
+                    style={{ left: x, top: y, transform: 'translate(-50%, -50%)', fontSize: '8px', lineHeight: 1 }}>
+                    {n}
+                  </span>
+                ))}
+
+                {/* Hour hand */}
+                <span className="absolute left-1/2 top-1/2 w-[2.5px] h-[13px] bg-white/90 rounded-full"
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(localH % 12) * 30 + localM * 0.5}deg)`, boxShadow: '0 0 3px rgba(0,0,0,0.6)' }} />
+                {/* Minute hand */}
+                <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[19px] bg-white/70 rounded-full"
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localM * 6 + localS * 0.1}deg)`, boxShadow: '0 0 3px rgba(0,0,0,0.6)' }} />
+                {/* Second hand — with counterweight tail */}
+                <span className="absolute left-1/2 top-1/2 w-px h-[26px] rounded-full"
+                  style={{ background: ACCENT, transformOrigin: '50% 77%', transform: `translate(-50%, -77%) rotate(${localS * 6}deg)`, boxShadow: `0 0 4px ${ACCENT}88` }} />
+                {/* Center cap */}
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[5px] h-[5px] rounded-full border border-white/90"
+                  style={{ background: ACCENT }} />
               </div>
 
               <div className="min-w-0">
