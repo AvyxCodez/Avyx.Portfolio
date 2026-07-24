@@ -853,8 +853,8 @@ function App() {
         }
 
         @keyframes nameGlow {
-          0%, 15%, 75%, 100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
-          40% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.55)); }
+          0%, 100% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.35)) drop-shadow(0 0 16px rgba(255,255,255,0.18)); }
+          50% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.55)); }
         }
       `}</style>
 
@@ -1087,7 +1087,7 @@ function App() {
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    animation: 'nameShine 5s ease-in-out infinite, nameGlow 5s ease-in-out infinite',
+                    animation: 'nameShine 8s ease-in-out infinite, nameGlow 8s ease-in-out infinite',
                   }}>
                   {SITE_CONFIG.username}
                 </h1>
