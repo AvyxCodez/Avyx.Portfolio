@@ -132,29 +132,38 @@ const ACCENT = "#60a5fa";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-const fadeTexts = ["Welcome", "Developer", "WebDev"];
+const fadeTexts = ["Welcome", "Developer", "WebDev", "Programmer"];
 
 const songs = [
   {
     id: 1,
-    title: "DON'T YOU LIE",
-    artist: "Offset",
-    url: "https://files.catbox.moe/ygafnn.mp3",
-    albumArt: "https://files.catbox.moe/vbosn0.png",
+    title: "Exit Music",
+    artist: "Radiohead",
+    url: "https://files.catbox.moe/g76a4s.mp3",
+    albumArt: "https://files.catbox.moe/9vx49d.jpeg",
   },
+
   {
     id: 2,
-    title: "Enemies",
-    artist: "Offset",
-    url: "https://files.catbox.moe/rot9gk.mp3",
-    albumArt: "https://files.catbox.moe/kmrfil.png",
+    title: "Runaway",
+    artist: "Kanye West",
+    url: "https://files.catbox.moe/xi05wx.mp3",
+    albumArt: "https://files.catbox.moe/qhj1im.jpg",
+  },
+
+  {
+    id: 3,
+    title: "Young Forever",
+    artist: "JAY-Z, Mr Hudson",
+    url: "https://files.catbox.moe/i8xbc8.mp3",
+    albumArt: "https://files.catbox.moe/na4cbc.jpg",
   },
 ];
 
 const skills = [
   { name: 'Python',       pct: 85 },
   { name: 'JavaScript',   pct: 90 },
-  { name: 'TypeScript',   pct: 78 },
+  { name: 'TypeScript',   pct: 98 },
   { name: 'React',        pct: 88 },
   { name: 'Tailwind CSS', pct: 92 },
   { name: 'Node.js',      pct: 72 },
