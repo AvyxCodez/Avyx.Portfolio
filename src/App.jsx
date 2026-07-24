@@ -1024,7 +1024,7 @@ function App() {
       <div ref={snapContainerRef} className={`snap-container relative z-20 h-screen overflow-y-scroll transition-all duration-500 ${showEnter ? 'blur-lg' : ''}`} style={{ scrollbarWidth: 'none' }}>
 
         {/* PAGE 1 - Profile Card */}
-        <div className="snap-section min-h-screen flex flex-col items-center justify-center px-6">
+        <div className="snap-section relative min-h-screen flex flex-col items-center justify-center px-6">
           <div
             className={`relative w-full max-w-[400px] transition-all duration-700 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
             onMouseMove={handleMouseMove}
@@ -1181,6 +1181,13 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* Scroll indicator */}
+          <button onClick={() => scrollToSection(1)}
+            className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 transition-opacity duration-700 delay-500 ${showProfile ? 'opacity-100' : 'opacity-0'}`}>
+            <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/30">Scroll for more</span>
+            <i className="fa-solid fa-chevron-down text-xs animate-bounce" style={{ color: `${ACCENT}cc` }} />
+          </button>
         </div>
 
         {/* PAGE 2 — About Me (sidebar identity rail + content column) */}
