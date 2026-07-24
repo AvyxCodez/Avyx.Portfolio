@@ -1036,7 +1036,7 @@ function App() {
         {/* PAGE 1 - Profile Card */}
         <div className="snap-section relative min-h-screen flex flex-col items-center justify-center px-6">
           <div
-            className={`relative w-full max-w-[400px] transition-all duration-700 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+            className={`relative w-full max-w-[330px] sm:max-w-[400px] transition-all duration-700 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
@@ -1057,20 +1057,20 @@ function App() {
               {/* Ambient glow top */}
               <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-48 bg-white/5 blur-3xl rounded-full pointer-events-none" />
 
-              <div className="relative z-10 p-8">
+              <div className="relative z-10 p-6 sm:p-8">
 
                 {/* Avatar */}
-                <div className="flex justify-center mb-6" style={{ animation: 'float 4s ease-in-out infinite' }}>
+                <div className="flex justify-center mb-5 sm:mb-6" style={{ animation: 'float 4s ease-in-out infinite' }}>
                   <div className="relative">
                     {/* Gradient ring */}
-                    <div className="relative w-[108px] h-[108px] rounded-full p-[2.5px]"
+                    <div className="relative w-[84px] h-[84px] sm:w-[108px] sm:h-[108px] rounded-full p-[2.5px]"
                       style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
                       <div className="w-full h-full rounded-full overflow-hidden">
                         <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
                       </div>
                     </div>
                     {/* Status dot */}
-                    <div className={`absolute bottom-1 right-1 w-[18px] h-[18px] rounded-full border-[2.5px] border-[#080808] shadow-lg ${
+                    <div className={`absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1 w-[15px] h-[15px] sm:w-[18px] sm:h-[18px] rounded-full border-[2.5px] border-[#080808] shadow-lg ${
                       discordStatus === 'online' ? 'bg-emerald-400 shadow-emerald-400/60' :
                       discordStatus === 'idle'   ? 'bg-yellow-400 shadow-yellow-400/60' :
                       discordStatus === 'dnd'    ? 'bg-red-500 shadow-red-500/60' :
@@ -1080,7 +1080,7 @@ function App() {
                 </div>
 
                 {/* Name */}
-                <h1 className="text-center text-[2.1rem] font-bold tracking-tight mb-3"
+                <h1 className="text-center text-[1.6rem] sm:text-[2.1rem] font-bold tracking-tight mb-2.5 sm:mb-3"
                   style={{
                     backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
                     backgroundSize: '250% 100%',
@@ -1094,11 +1094,11 @@ function App() {
 
                 {/* Discord badges */}
                 {discordBadges.length > 0 && (
-                  <div className="flex justify-center gap-3 mb-4">
+                  <div className="flex justify-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
                     {discordBadges.map((badge) => (
                       <div key={badge.icon} className="relative group flex items-center justify-center">
                         <span
-                          className="inline-block w-5 h-5 transition-all duration-200 group-hover:scale-125"
+                          className="inline-block w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200 group-hover:scale-125"
                           style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.55))' }}
                           onMouseEnter={e => e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.95))'}
                           onMouseLeave={e => e.currentTarget.style.filter = 'drop-shadow(0 0 4px rgba(255,255,255,0.55))'}
@@ -1114,14 +1114,14 @@ function App() {
                 )}
 
                 {/* Chips row */}
-                <div className="flex items-center justify-center gap-2 flex-wrap mb-5">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap mb-4 sm:mb-5">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
                     <i className="fa-solid fa-code text-[8px]" /> Developer
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
                     <i className="fa-solid fa-location-dot text-[8px]" /> Denver
                   </span>
-                  <span className={`inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full border ${
+                  <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1 rounded-full border ${
                     discordStatus === 'online' ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' :
                     discordStatus === 'idle'   ? 'bg-yellow-500/10 border-yellow-500/25 text-yellow-400' :
                     discordStatus === 'dnd'    ? 'bg-red-500/10 border-red-500/25 text-red-400' :
@@ -1137,7 +1137,7 @@ function App() {
                 </div>
 
                 {/* Cycling text */}
-                <div className="h-5 flex items-center justify-center mb-6">
+                <div className="h-5 flex items-center justify-center mb-5 sm:mb-6">
                   <span className={`text-[11px] tracking-[4px] uppercase transition-opacity duration-500 ${fadeVisible ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: `${ACCENT}bb` }}>
                     {fadeTexts[currentFadeIndex]}
@@ -1145,27 +1145,27 @@ function App() {
                 </div>
 
                 {/* Gradient divider */}
-                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
+                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
 
                 {/* Social icons */}
                 <div className="flex justify-center gap-3">
                   <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-discord" />
                   </a>
                   <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-x-twitter" />
                   </a>
                   <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <svg viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <polygon points="50,2 93,26 93,74 50,98 7,74 7,26" />
                       <text x="50" y="66" textAnchor="middle" fontFamily="Arial Black,sans-serif" fontWeight="900" fontSize="38" fill="#000">cfx</text>
                     </svg>
                   </a>
                   <a href="#"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
                     <i className="fa-brands fa-instagram" />
                   </a>
                 </div>
@@ -1175,7 +1175,7 @@ function App() {
           </div>
 
           {/* World clock — my time + visitor delta */}
-          <div className={`w-full max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className={`w-full max-w-[330px] sm:max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
 
               {/* Analog face — visitor's local time */}
@@ -1223,7 +1223,7 @@ function App() {
                 <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
                   <i className="fa-regular fa-clock text-[9px]" /> {visitorTimeZone || 'Local time'}
                 </p>
-                <p className="font-mono text-xl font-semibold text-white tabular-nums leading-tight">{localTimeStr}</p>
+                <p className="font-mono text-lg sm:text-xl font-semibold text-white tabular-nums leading-tight">{localTimeStr}</p>
                 <p className="font-mono text-[11px] text-white/40">{localDateStr} · {localGmt}</p>
               </div>
             </div>
