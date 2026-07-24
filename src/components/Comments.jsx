@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase } from '../lib/supabase';
+
+// Local dev has no serverless functions — fall back to localStorage
+const IS_DEV = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const DEV_KEY = 'avyx-comments';
+const devRead = () => { try { return JSON.parse(localStorage.getItem(DEV_KEY) || '[]'); } catch { return []; } };
+const devWrite = (list) => localStorage.setItem(DEV_KEY, JSON.stringify(list));
 
 const formatDate = (ts) => {
   const d = new Date(ts);
@@ -43,24 +48,50 @@ export default function Comments() {
   const sorted = newest ? [...comments] : [...comments].reverse();
 
   useEffect(() => {
-    if (!open || !supabase) return;
+    if (!open) return;
     setLoading(true);
-    supabase.from('comments').select('*').order('created_at', { ascending: false })
-      .then(({ data }) => { setComments(data || []); setLoading(false); });
+    if (IS_DEV) {
+      setComments(devRead());
+      setLoading(false);
+      return;
+    }
+    fetch('/api/comments')
+      .then(r => r.json())
+      .then(d => { setComments(d.comments || []); setLoading(false); })
+      .catch(() => { setComments([]); setLoading(false); });
   }, [open]);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) { setError('Fill in both fields.'); return; }
     if (message.trim().length > 200) { setError('Max 200 characters.'); return; }
-    if (!supabase) { setError('Comments unavailable.'); return; }
     setError(''); setSubmitting(true);
-    const { data, error: err } = await supabase
-      .from('comments').insert({ name: name.trim(), message: message.trim() }).select().single();
-    setSubmitting(false);
-    if (err) { setError('Something went wrong.'); return; }
-    setComments(prev => [data, ...prev]);
-    setMessage(''); setName(''); setShowForm(false);
+
+    if (IS_DEV) {
+      const comment = { id: String(Date.now()), name: name.trim(), message: message.trim(), created_at: new Date().toISOString() };
+      const next = [comment, ...devRead()];
+      devWrite(next);
+      setComments(next);
+      setSubmitting(false);
+      setMessage(''); setName(''); setShowForm(false);
+      return;
+    }
+
+    try {
+      const r = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), message: message.trim() }),
+      });
+      const d = await r.json();
+      setSubmitting(false);
+      if (!r.ok) { setError(d.error || 'Something went wrong.'); return; }
+      setComments(prev => [d.comment, ...prev]);
+      setMessage(''); setName(''); setShowForm(false);
+    } catch {
+      setSubmitting(false);
+      setError('Something went wrong.');
+    }
   };
 
   const Panel = (
