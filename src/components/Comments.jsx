@@ -14,8 +14,8 @@ const formatDate = (ts) => {
 
 const gradientAvatar = (name) => {
   const pairs = [
-    ['#dc2626','#dc2626'], ['#ec4899','#f43f5e'], ['#10b981','#06b6d4'],
-    ['#f59e0b','#dc2626'], ['#3b82f6','#dc2626'], ['#dc2626','#ec4899'],
+    ['#3b82f6','#3b82f6'], ['#ec4899','#f43f5e'], ['#10b981','#06b6d4'],
+    ['#f59e0b','#3b82f6'], ['#3b82f6','#3b82f6'], ['#3b82f6','#ec4899'],
     ['#06b6d4','#10b981'], ['#f97316','#f59e0b'],
   ];
   let hash = 0;
@@ -148,11 +148,11 @@ export default function Comments() {
 
       {/* Top accent gradient bar */}
       <div className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, #dc2626 30%, #dc2626 70%, transparent)' }} />
+        style={{ background: 'linear-gradient(90deg, transparent, #3b82f6 30%, #3b82f6 70%, transparent)' }} />
 
       {/* Subtle background glow */}
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #dc2626, transparent)' }} />
+        style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
 
       {/* Drag handle — mobile only */}
       {isMobile && (
@@ -165,7 +165,7 @@ export default function Comments() {
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #dc2626, #b91c1c)', boxShadow: '0 0 16px rgba(220,38,38,0.4)' }}>
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 0 16px rgba(96,165,250,0.4)' }}>
             <i className="fa-regular fa-comment text-white text-xs" />
           </div>
           <div>
@@ -188,7 +188,7 @@ export default function Comments() {
           {/* New comment */}
           <button onClick={() => { setShowForm(f => !f); setError(''); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #dc2626, #b91c1c)', boxShadow: showForm ? '0 0 16px rgba(220,38,38,0.4)' : 'none' }}>
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: showForm ? '0 0 16px rgba(96,165,250,0.4)' : 'none' }}>
             <i className={`fa-solid text-[9px] transition-transform duration-200 ${showForm ? 'fa-xmark' : 'fa-plus'}`} />
             {showForm ? 'Cancel' : 'Leave a note'}
           </button>
@@ -214,15 +214,15 @@ export default function Comments() {
               <input value={name} onChange={e => setName(e.target.value)}
                 placeholder="Your name" maxLength={32}
                 className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#dc2626' }}
-                onFocus={e => e.target.style.borderColor = 'rgba(220,38,38,0.5)'}
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#3b82f6' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(96,165,250,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
               />
               <textarea value={message} onChange={e => setMessage(e.target.value)}
                 placeholder="Say something..." maxLength={200} rows={3}
                 className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all resize-none"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#dc2626' }}
-                onFocus={e => e.target.style.borderColor = 'rgba(220,38,38,0.5)'}
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#3b82f6' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(96,165,250,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
               />
               {error && <p className="text-red-400 text-xs">{error}</p>}
@@ -232,7 +232,7 @@ export default function Comments() {
                 </span>
                 <button type="submit" disabled={submitting}
                   className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg, #dc2626, #b91c1c)' }}>
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
                   {submitting ? 'Posting…' : 'Post →'}
                 </button>
               </div>
@@ -248,15 +248,15 @@ export default function Comments() {
       <div className="overflow-y-auto" style={{ maxHeight: isMobile ? '52vh' : '22rem', scrollbarWidth: 'none' }}>
         {loading ? (
           <div className="flex items-center justify-center py-12 gap-2">
-            <div className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-1 h-1 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-1 h-1 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-1 h-1 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         ) : comments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-1"
-              style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)' }}>
-              <i className="fa-regular fa-comment text-red-400 text-sm" />
+              style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)' }}>
+              <i className="fa-regular fa-comment text-blue-400 text-sm" />
             </div>
             <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>No notes yet</p>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>Be the first to leave one</p>

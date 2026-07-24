@@ -128,7 +128,7 @@ const SITE_CONFIG = {
 
 const DISCORD_USER_ID = "825785012468056155";
 
-const ACCENT = "#dc2626";
+const ACCENT = "#60a5fa";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
@@ -169,7 +169,7 @@ const projects = [
     tags: ['File Sharing', 'No Signup', '200MB Limit', 'Self-Destruct Uploads'],
     url: 'https://lumora-io-production.up.railway.app/',
     icon: 'fa-solid fa-link',
-    color: '#dc2626',
+    color: '#60a5fa',
   },
 ];
 
@@ -885,8 +885,8 @@ function App() {
         )}
       </div>
 
-      <div className="fixed inset-0 z-10 bg-black/50 pointer-events-none" />
-      <div className="fixed inset-0 z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 40%, transparent 0%, rgba(0,0,0,0.45) 100%)' }} />
+      <div className="fixed inset-0 z-10 pointer-events-none" style={{ background: 'rgba(6,12,28,0.45)' }} />
+      <div className="fixed inset-0 z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 40%, transparent 0%, rgba(3,7,18,0.5) 100%)' }} />
 
       {/* Particles */}
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
