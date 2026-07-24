@@ -364,18 +364,9 @@ function App() {
   };
 
   const [currentFadeIndex, setCurrentFadeIndex] = useState(0);
-  const [fadeVisible, setFadeVisible] = useState(true);
 
   useEffect(() => {
-    const cycleText = () => {
-      setFadeVisible(false);
-      setTimeout(() => {
-        setCurrentFadeIndex((prev) => (prev + 1) % fadeTexts.length);
-        setFadeVisible(true);
-      }, 500);
-    };
-
-    const interval = setInterval(cycleText, 3500);
+    const interval = setInterval(() => setCurrentFadeIndex((prev) => (prev + 1) % fadeTexts.length), 3500);
     return () => clearInterval(interval);
   }, []);
 
@@ -1136,12 +1127,17 @@ function App() {
                   </span>
                 </div>
 
-                {/* Cycling text */}
-                <div className="h-5 flex items-center justify-center mb-5 sm:mb-6">
-                  <span className={`text-[11px] tracking-[4px] uppercase transition-opacity duration-500 ${fadeVisible ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ color: `${ACCENT}bb` }}>
-                    {fadeTexts[currentFadeIndex]}
-                  </span>
+                {/* Cycling text — crossfade, old word fully out before the next enters */}
+                <div className="relative h-5 mb-5 sm:mb-6">
+                  <AnimatePresence mode="wait">
+                    <motion.span key={currentFadeIndex}
+                      initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.45, ease: 'easeInOut' }}
+                      className="absolute inset-0 flex items-center justify-center text-[10px] sm:text-[11px] tracking-[4px] uppercase whitespace-nowrap"
+                      style={{ color: `${ACCENT}bb` }}>
+                      {fadeTexts[currentFadeIndex]}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
 
                 {/* Gradient divider */}
