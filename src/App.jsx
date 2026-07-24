@@ -266,21 +266,6 @@ const visitorTimeZone = (() => {
 const visitorCity = visitorTimeZone.includes('/')
   ? visitorTimeZone.split('/').pop().replace(/_/g, ' ')
   : (visitorTimeZone || 'Local time');
-// Owner clock — my timezone, shown on the profile page with the visitor's delta
-const OWNER_TZ = 'America/Denver';
-
-const tzOffsetMinutes = (tz, d) => {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: tz, hour12: false,
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-    }).formatToParts(d).map(p => [p.type, p.value])
-  );
-  const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour % 24, +parts.minute, +parts.second);
-  return Math.round((asUTC - d.getTime()) / 60000);
-};
-
 const formatGmt = (offMin) => {
   const sign = offMin >= 0 ? '+' : '−';
   const abs = Math.abs(offMin);
@@ -861,25 +846,13 @@ function App() {
 
   useCanvasCursor();
 
-  // Owner clock (Denver) + visitor delta, recomputed each tick
-  const ownerParts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: OWNER_TZ, hour12: false,
-      weekday: 'short', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-    }).formatToParts(clockTime).map(p => [p.type, p.value])
-  );
-  const ownerH = +ownerParts.hour % 24;
-  const ownerM = +ownerParts.minute;
-  const ownerS = +ownerParts.second;
-  const ownerTimeStr = `${String(ownerH).padStart(2, '0')}:${ownerParts.minute}:${ownerParts.second}`;
-  const ownerDateStr = `${ownerParts.weekday}, ${ownerParts.month} ${ownerParts.day}`;
-  const ownerGmt = formatGmt(tzOffsetMinutes(OWNER_TZ, clockTime));
-  const visitorTime12 = clockTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-  const tzDiffH = (-clockTime.getTimezoneOffset() - tzOffsetMinutes(OWNER_TZ, clockTime)) / 60;
-  const tzDiffLabel = tzDiffH === 0
-    ? 'same time'
-    : `${tzDiffH > 0 ? '+' : '−'}${Math.abs(tzDiffH) % 1 === 0 ? Math.abs(tzDiffH) : Math.abs(tzDiffH).toFixed(1)}h`;
+  // Visitor-local clock, recomputed each tick
+  const localH = clockTime.getHours();
+  const localM = clockTime.getMinutes();
+  const localS = clockTime.getSeconds();
+  const localTimeStr = [localH, localM, localS].map(n => String(n).padStart(2, '0')).join(':');
+  const localDateStr = clockTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const localGmt = formatGmt(-clockTime.getTimezoneOffset());
 
 
 
@@ -1236,26 +1209,23 @@ function App() {
           <div className={`w-full max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="flex items-center gap-4 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] px-4 py-3.5">
 
-              {/* Analog face — Denver time */}
+              {/* Analog face — visitor's local time */}
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full border border-white/20 bg-white/[0.05]">
                 <span className="absolute left-1/2 top-1/2 w-[2px] h-[13px] bg-white/85 rounded-full"
-                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(ownerH % 12) * 30 + ownerM * 0.5}deg)` }} />
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(localH % 12) * 30 + localM * 0.5}deg)` }} />
                 <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[18px] bg-white/60 rounded-full"
-                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerM * 6 + ownerS * 0.1}deg)` }} />
+                  style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localM * 6 + localS * 0.1}deg)` }} />
                 <span className="absolute left-1/2 top-1/2 w-px h-[19px] rounded-full"
-                  style={{ background: ACCENT, transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerS * 6}deg)` }} />
+                  style={{ background: ACCENT, transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localS * 6}deg)` }} />
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[4px] h-[4px] rounded-full bg-white" />
               </div>
 
               <div className="min-w-0">
                 <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
-                  <i className="fa-regular fa-clock text-[9px]" /> {OWNER_TZ}
+                  <i className="fa-regular fa-clock text-[9px]" /> {visitorTimeZone || 'Local time'}
                 </p>
-                <p className="font-mono text-xl font-semibold text-white tabular-nums leading-tight">{ownerTimeStr}</p>
-                <p className="font-mono text-[11px] text-white/40">{ownerDateStr} · {ownerGmt}</p>
-                <p className="font-mono text-[11px] mt-0.5" style={{ color: `${ACCENT}dd` }}>
-                  Your time: {visitorTime12} ({tzDiffLabel})
-                </p>
+                <p className="font-mono text-xl font-semibold text-white tabular-nums leading-tight">{localTimeStr}</p>
+                <p className="font-mono text-[11px] text-white/40">{localDateStr} · {localGmt}</p>
               </div>
             </div>
           </div>
