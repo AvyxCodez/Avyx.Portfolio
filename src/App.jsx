@@ -1106,8 +1106,9 @@ function App() {
         onMouseLeave={() => setShowVolumeSlider(false)}
       >
         {/* Icon button */}
-        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/15 transition-all duration-200">
-          <i className={`fa-solid ${volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'} text-sm`}></i>
+        <button className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-125"
+          style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
+          <i className={`fa-solid ${volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'} text-xl`}></i>
         </button>
 
         {/* Popup card */}
@@ -1186,28 +1187,41 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Click to Enter */}
+      {/* Click to Enter — splits open like two panels (top slides up, bottom slides down) */}
       <AnimatePresence>
         {!siteLoading && showEnter && (
-          <motion.div key="enter"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }}
-            transition={{ duration: 0.5 }}
-            onClick={enterSite}
-            className="group fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 cursor-none">
-            <div className="absolute w-96 h-96 rounded-full bg-white/[0.025] blur-3xl pointer-events-none" />
+          <motion.div key="enter" onClick={enterSite}
+            className="group fixed inset-0 z-[90] cursor-none overflow-hidden">
+
+            {/* Top panel — slides up */}
+            <motion.div
+              exit={{ y: '-101%' }}
+              transition={{ duration: 0.85, ease: [0.83, 0, 0.17, 1] }}
+              className="absolute top-0 inset-x-0 h-1/2 bg-black" />
+
+            {/* Bottom panel — slides down */}
+            <motion.div
+              exit={{ y: '101%' }}
+              transition={{ duration: 0.85, ease: [0.83, 0, 0.17, 1] }}
+              className="absolute bottom-0 inset-x-0 h-1/2 bg-black" />
+
+            {/* Seam glow at the split */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px pointer-events-none"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)' }} />
+
+            {/* Content — fades out as the panels open */}
             <motion.div
               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
               transition={{ duration: 0.6, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
-              className="relative text-center">
-              <div className="relative inline-flex items-center justify-center mb-7" style={{ animation: 'float 3s ease-in-out infinite' }}>
-                <span className="absolute inset-0 rounded-full border border-white/20 animate-ping" style={{ animationDuration: '2.2s' }} />
-                <div className="relative w-16 h-16 rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:border-white/50 group-hover:bg-white/5">
-                  <i className="fa-solid fa-play text-white/80 text-lg ml-1"></i>
-                </div>
-              </div>
-              <div className="text-white text-2xl tracking-[6px] font-light mb-2">ENTER</div>
-              <div className="text-white/50 text-sm tracking-[3px]">AVYX</div>
-              <div className="text-white/25 text-[10px] tracking-[2px] mt-5 font-mono uppercase">Click or press Enter</div>
+              className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-white/[0.025] blur-3xl pointer-events-none" />
+              <div className="relative text-white text-2xl tracking-[6px] font-light mb-2" style={{ animation: 'float 3s ease-in-out infinite' }}>ENTER</div>
+              <div className="relative text-white/50 text-sm tracking-[3px]">AVYX</div>
             </motion.div>
           </motion.div>
         )}
