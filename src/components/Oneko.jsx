@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
-// A wandering oneko cat that roams the page on its own — and you can pet it.
+// A wandering oneko cat that roams the page, rests with a random activity
+// (sit / sleep / groom / scratch a wall), and can be petted.
 // Sprite + frame coordinates from https://github.com/adryd325/oneko.js
 export default function Oneko() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // heart-pop animation for petting
     const styleEl = document.createElement('style');
     styleEl.textContent = `
       @keyframes onekoHeart {
@@ -25,7 +25,9 @@ export default function Oneko() {
     let targetY = nekoPosY;
     let waitTicks = 0;
     let petHappy = 0;
-    let frameCount = 0, idleTime = 0, idleAnimation = null, idleAnimationFrame = 0;
+    let restAnim = null;
+    let restFrame = 0;
+    let frameCount = 0;
     const nekoSpeed = 10;
 
     const spriteSets = {
@@ -70,79 +72,89 @@ export default function Oneko() {
       const sprite = set[frame % set.length];
       nekoEl.style.backgroundPosition = `${sprite[0] * 32}px ${sprite[1] * 32}px`;
     };
-    const resetIdleAnimation = () => { idleAnimation = null; idleAnimationFrame = 0; };
 
-    // Pick a new random spot to wander to, then rest a while
+    // Pick a new place to wander to — sometimes a wall edge so it can scratch it
     const pickTarget = () => {
-      targetX = 40 + Math.random() * Math.max(1, window.innerWidth - 80);
-      targetY = 40 + Math.random() * Math.max(1, window.innerHeight - 80);
-      waitTicks = 24 + Math.floor(Math.random() * 72);
-      idleTime = 0;
-      resetIdleAnimation();
+      const w = window.innerWidth, h = window.innerHeight;
+      if (Math.random() < 0.3) {
+        const side = Math.floor(Math.random() * 4);
+        if (side === 0) { targetX = 20; targetY = 40 + Math.random() * (h - 80); }
+        else if (side === 1) { targetX = w - 20; targetY = 40 + Math.random() * (h - 80); }
+        else if (side === 2) { targetX = 40 + Math.random() * (w - 80); targetY = 20; }
+        else { targetX = 40 + Math.random() * (w - 80); targetY = h - 20; }
+      } else {
+        targetX = 40 + Math.random() * Math.max(1, w - 80);
+        targetY = 40 + Math.random() * Math.max(1, h - 80);
+      }
+      waitTicks = 26 + Math.floor(Math.random() * 80);
+      restAnim = null;
     };
     pickTarget();
 
+    // Choose what the cat does while resting at a spot
+    const chooseRest = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      const roll = Math.random();
+      if (nekoPosY < 40 && roll < 0.7) restAnim = 'scratchWallN';
+      else if (nekoPosY > h - 40 && roll < 0.7) restAnim = 'scratchWallS';
+      else if (nekoPosX > w - 40 && roll < 0.7) restAnim = 'scratchWallE';
+      else if (nekoPosX < 40 && roll < 0.7) restAnim = 'scratchWallW';
+      else if (roll < 0.4) restAnim = 'sleeping';
+      else if (roll < 0.68) restAnim = 'scratchSelf';
+      else restAnim = 'idle';
+      restFrame = 0;
+    };
+
+    const playRest = () => {
+      restFrame += 1;
+      switch (restAnim) {
+        case 'sleeping':
+          if (restFrame < 8) setSprite('tired', 0);
+          else setSprite('sleeping', Math.floor(restFrame / 4));
+          break;
+        case 'scratchSelf':
+        case 'scratchWallN':
+        case 'scratchWallS':
+        case 'scratchWallE':
+        case 'scratchWallW':
+          setSprite(restAnim, restFrame);
+          break;
+        default:
+          setSprite('idle', 0);
+      }
+    };
+
     const spawnHeart = () => {
-      const h = document.createElement('div');
-      h.textContent = '❤';
-      h.style.cssText =
+      const heart = document.createElement('div');
+      heart.textContent = '❤';
+      heart.style.cssText =
         `position:fixed;left:${nekoPosX - 5}px;top:${nekoPosY - 22}px;z-index:61;pointer-events:none;` +
         `color:#ff8ab5;font-size:13px;text-shadow:0 0 6px rgba(255,138,181,0.6);` +
         `animation:onekoHeart 1s ease-out forwards;`;
-      h.style.setProperty('--dx', `${Math.random() * 22 - 11}px`);
-      document.body.appendChild(h);
-      setTimeout(() => h.remove(), 1000);
+      heart.style.setProperty('--dx', `${Math.random() * 22 - 11}px`);
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 1000);
     };
 
     const onPet = () => {
       for (let i = 0; i < 3; i++) setTimeout(spawnHeart, i * 110);
-      targetX = nekoPosX; targetY = nekoPosY; // stop and enjoy the pets
-      petHappy = 16;
+      targetX = nekoPosX; targetY = nekoPosY;
+      petHappy = 22; // ~4 frames "alert" + happy grooming
       nekoEl.style.transition = 'transform 0.14s ease';
       nekoEl.style.transform = 'scale(1.3)';
       setTimeout(() => { nekoEl.style.transform = 'scale(1)'; }, 150);
     };
     nekoEl.addEventListener('click', onPet);
 
-    const idle = () => {
-      idleTime += 1;
-      if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && idleAnimation == null) {
-        const options = ['sleeping', 'scratchSelf'];
-        if (nekoPosX < 32) options.push('scratchWallW');
-        if (nekoPosY < 32) options.push('scratchWallN');
-        if (nekoPosX > window.innerWidth - 32) options.push('scratchWallE');
-        if (nekoPosY > window.innerHeight - 32) options.push('scratchWallS');
-        idleAnimation = options[Math.floor(Math.random() * options.length)];
-      }
-      switch (idleAnimation) {
-        case 'sleeping':
-          if (idleAnimationFrame < 8) { setSprite('tired', 0); break; }
-          setSprite('sleeping', Math.floor(idleAnimationFrame / 4));
-          if (idleAnimationFrame > 192) resetIdleAnimation();
-          break;
-        case 'scratchWallN':
-        case 'scratchWallS':
-        case 'scratchWallE':
-        case 'scratchWallW':
-        case 'scratchSelf':
-          setSprite(idleAnimation, idleAnimationFrame);
-          if (idleAnimationFrame > 9) resetIdleAnimation();
-          break;
-        default:
-          setSprite('idle', 0);
-          return;
-      }
-      idleAnimationFrame += 1;
-    };
-
     const frame = () => {
       frameCount += 1;
 
-      // just been petted — do a happy groom, then resume
+      // reacting to a pet: perk up (alert), then a happy groom
       if (petHappy > 0) {
         petHappy -= 1;
-        setSprite('scratchSelf', frameCount);
-        if (petHappy === 0) waitTicks = 8;
+        if (petHappy > 18) setSprite('alert', 0);
+        else setSprite('scratchSelf', frameCount);
+        if (petHappy === 0) { waitTicks = 10; restAnim = 'idle'; restFrame = 0; }
         return;
       }
 
@@ -150,20 +162,19 @@ export default function Oneko() {
       const diffY = nekoPosY - targetY;
       const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-      // reached the spot — rest, then pick a new one
+      // arrived — rest with a chosen activity, then move on
       if (distance < 12) {
         nekoPosX = targetX; nekoPosY = targetY;
         nekoEl.style.left = `${nekoPosX - 16}px`;
         nekoEl.style.top = `${nekoPosY - 16}px`;
-        idle();
+        if (restAnim === null) chooseRest();
+        playRest();
         waitTicks -= 1;
         if (waitTicks <= 0) pickTarget();
         return;
       }
 
-      idleAnimation = null;
-      idleAnimationFrame = 0;
-
+      // walking toward the target
       let direction = '';
       direction += diffY / distance > 0.5 ? 'N' : '';
       direction += diffY / distance < -0.5 ? 'S' : '';
