@@ -827,6 +827,10 @@ function App() {
           font-family: 'Geist', system-ui, -apple-system, sans-serif;
         }
 
+        /* Social icons — plain white glyphs with an always-on glow */
+        .social-ico { transition: color .2s ease, transform .2s ease, filter .2s ease; filter: drop-shadow(0 0 7px rgba(255,255,255,0.5)); }
+        .social-ico:hover { color:#fff; transform: translateY(-2px); filter: drop-shadow(0 0 14px rgba(255,255,255,0.85)); }
+
         @keyframes sparkle {
           0%, 100% { opacity: 0; transform: scale(0.5); }
           50% { opacity: 1; transform: scale(1); }
@@ -1139,25 +1143,26 @@ function App() {
                 <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
 
                 {/* Social icons */}
-                <div className="flex justify-center gap-3">
-                  <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer"
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
+                <div className="flex justify-center items-center gap-4 sm:gap-[18px] text-white/90">
+                  <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer" aria-label="Discord"
+                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
                     <i className="fa-brands fa-discord" />
                   </a>
-                  <a href="#"
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <i className="fa-brands fa-x-twitter" />
+                  <a href="#" aria-label="GitHub"
+                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    <i className="fa-brands fa-github" />
                   </a>
-                  <a href="#"
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <svg viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <polygon points="50,2 93,26 93,74 50,98 7,74 7,26" />
-                      <text x="50" y="66" textAnchor="middle" fontFamily="Arial Black,sans-serif" fontWeight="900" fontSize="38" fill="#000">cfx</text>
-                    </svg>
+                  <a href="#" aria-label="Email"
+                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    <i className="fa-solid fa-envelope" />
                   </a>
-                  <a href="#"
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg text-white/55 bg-white/[0.04] border border-white/[0.08] transition-all duration-200 hover:text-white hover:bg-white/[0.09] hover:border-white/[0.18] hover:-translate-y-0.5">
-                    <i className="fa-brands fa-instagram" />
+                  <a href="#" aria-label="Telegram"
+                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    <i className="fa-brands fa-telegram" />
+                  </a>
+                  <a href="#" aria-label="Website"
+                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    <i className="fa-solid fa-globe" />
                   </a>
                 </div>
 
