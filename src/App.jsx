@@ -1052,7 +1052,7 @@ function App() {
                 <div className="flex justify-center mb-5 sm:mb-6" style={{ animation: 'float 4s ease-in-out infinite' }}>
                   <div className="relative">
                     {/* Gradient ring */}
-                    <div className="relative w-[84px] h-[84px] sm:w-[108px] sm:h-[108px] rounded-full p-[2.5px]"
+                    <div className="relative w-[96px] h-[96px] sm:w-[108px] sm:h-[108px] rounded-full p-[2.5px]"
                       style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
                       <div className="w-full h-full rounded-full overflow-hidden">
                         <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Profile" />
@@ -1069,7 +1069,7 @@ function App() {
                 </div>
 
                 {/* Name */}
-                <h1 className="text-center text-[1.6rem] sm:text-[2.1rem] font-bold tracking-tight mb-2.5 sm:mb-3"
+                <h1 className="text-center text-[1.8rem] sm:text-[2.1rem] font-bold tracking-tight mb-2.5 sm:mb-3"
                   style={{
                     backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
                     backgroundSize: '250% 100%',
