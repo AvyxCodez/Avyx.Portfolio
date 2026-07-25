@@ -804,6 +804,38 @@ function App() {
     }, 80);
   };
 
+  // ── Media Session — lock-screen / Bluetooth / notification controls ──
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+    const ms = navigator.mediaSession;
+    try {
+      ms.metadata = new window.MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist,
+        album: currentSong.album || 'avyx.lol',
+        artwork: [{ src: new URL(currentSong.albumArt, window.location.origin).href, sizes: '512x512', type: 'image/jpeg' }],
+      });
+    } catch {}
+    const set = (action, handler) => { try { ms.setActionHandler(action, handler); } catch {} };
+    set('play', () => { ensureAnalyser(); audioRef.current?.play().catch(() => {}); });
+    set('pause', () => audioRef.current?.pause());
+    set('previoustrack', () => prevSong());
+    set('nexttrack', () => nextSong());
+    set('seekto', (e) => { const a = audioRef.current; if (a && e.seekTime != null) a.currentTime = e.seekTime; });
+    set('seekbackward', (e) => { const a = audioRef.current; if (a) a.currentTime = Math.max(0, a.currentTime - (e.seekOffset || 10)); });
+    set('seekforward', (e) => { const a = audioRef.current; if (a) a.currentTime = Math.min(a.duration || 0, a.currentTime + (e.seekOffset || 10)); });
+  }, [currentSong]);
+
+  useEffect(() => {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && duration > 0) {
+      try { navigator.mediaSession.setPositionState({ duration, position: Math.min(currentTime, duration), playbackRate: 1 }); } catch {}
+    }
+  }, [currentTime, duration]);
+
   const [discordAvatar, setDiscordAvatar] = useState(null);
   const [discordStatus, setDiscordStatus] = useState('offline');
   const [discordBadges, setDiscordBadges] = useState([]);
