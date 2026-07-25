@@ -176,6 +176,7 @@ const skillMeta = {
   'React':        { icon: 'fa-brands fa-react',    color: '#61DAFB' },
   'Tailwind CSS': { icon: 'fa-solid fa-wind',      color: '#38BDF8' },
   'Node.js':      { icon: 'fa-brands fa-node-js',  color: '#3C873A' },
+  'Next.js':      { icon: 'fa-brands fa-react',    color: '#ffffff' },
 };
 
 const projects = [
@@ -185,7 +186,8 @@ const projects = [
     tagline: 'A cozy little home for your files.',
     description: 'Drop a file, get a link — that\'s the whole thing. Instant file sharing with no account required, optional self-destructing uploads, and zero ads or tracking.',
     tags: ['File Sharing', 'No Signup', '200MB Limit', 'Self-Destruct Uploads'],
-    url: 'https://lumora-io-production.up.railway.app/',
+    stack: ['Next.js', 'TypeScript', 'Node.js'],
+    url: 'https://lumora-io.vercel.app/',
     icon: 'fa-solid fa-link',
     color: '#60a5fa',
   },
@@ -1514,59 +1516,74 @@ function App() {
           <div className="max-w-[900px] w-full mx-auto">
 
             {/* Header */}
-            <div className={`mb-6 transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="w-6 h-px" style={{ background: ACCENT }} />
-                <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>02 / Projects</p>
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
-                style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                What I've built
-              </h2>
-            </div>
+            <h2 className={`text-3xl sm:text-4xl font-bold text-white mb-5 tracking-tight transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              My Projects
+            </h2>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Project cards — banner style */}
+            <div className="space-y-4">
               {projects.map((project, i) => (
                 <button key={project.id}
                   onClick={() => openExternalLink(project.url, project.title)}
-                  className={`group relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] overflow-hidden text-left transition-all duration-700 hover:border-white/[0.15] hover:bg-white/[0.05] ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                  style={{ transitionDelay: `${i * 100 + 100}ms` }}>
+                  className={`group relative block w-full rounded-3xl overflow-hidden text-left min-h-[460px] sm:min-h-[380px] transition-all duration-700 hover:scale-[1.006] ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{
+                    transitionDelay: `${i * 100 + 100}ms`,
+                    background: `linear-gradient(165deg, ${project.color}1f 0%, #0b0b13 55%, #070709 100%)`,
+                    border: `1px solid ${project.color}22`,
+                    boxShadow: `0 26px 60px -26px ${project.color}55`,
+                  }}>
 
-                  {/* Banner */}
-                  <div className="relative h-32 flex items-center justify-center overflow-hidden"
-                    style={{ background: `linear-gradient(135deg, ${project.color}33, ${project.color}0d)` }}>
-                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-                    <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-30 pointer-events-none" style={{ background: project.color }} />
-                    <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                      style={{ background: `${project.color}22`, border: `1px solid ${project.color}44` }}>
-                      <i className={`${project.icon} text-2xl`} style={{ color: project.color }} />
+                  {/* Tiled icon texture */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ opacity: 0.05 }}>
+                    <div className="flex flex-wrap gap-x-10 gap-y-7 p-6 scale-[1.35] -rotate-6">
+                      {Array.from({ length: 60 }).map((_, k) => (
+                        <i key={k} className={project.icon} style={{ color: project.color, fontSize: 26, transform: `rotate(${(k * 47) % 80 - 40}deg)` }} />
+                      ))}
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-5">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <h3 className="text-lg font-semibold text-white">{project.title}</h3>
-                      <i className="fa-solid fa-arrow-up-right text-white/25 text-xs group-hover:text-white/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  {/* Giant project-name watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-6">
+                    <span className="font-bold leading-none text-center" style={{ fontSize: 'clamp(3.6rem, 18vw, 7rem)', color: project.color, opacity: 0.19, letterSpacing: '-0.02em' }}>
+                      {project.title}
+                    </span>
+                  </div>
+
+                  {/* Bottom scrim for legibility */}
+                  <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(6,7,10,0.96) 8%, rgba(6,7,10,0.55) 46%, transparent)' }} />
+
+                  {/* Tech stack — top */}
+                  <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2">
+                    {(project.stack || []).map((tech) => {
+                      const m = skillMeta[tech] || { icon: 'fa-solid fa-code', color: '#ffffff' };
+                      return (
+                        <span key={tech} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-white/80"
+                          style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}>
+                          <i className={`${m.icon} text-[11px]`} style={{ color: m.color }} />
+                          {tech}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {/* Bottom content */}
+                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h3 className="text-2xl font-bold text-white">{project.title}</h3>
+                      <i className="fa-solid fa-arrow-up-right text-white/30 text-sm group-hover:text-white/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                     </div>
-                    <p className="text-white/45 text-[13px] italic mb-2.5">{project.tagline}</p>
-                    <p className="text-white/55 text-[13px] leading-relaxed mb-3.5">{project.description}</p>
+                    <p className="text-white/50 text-[13px] sm:text-sm leading-relaxed max-w-xl mb-3">{project.description}</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {project.tags.map(tag => (
-                        <span key={tag} className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/[0.08] text-white/45">{tag}</span>
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="font-mono text-[10px] px-2 py-0.5 rounded-md text-white/45"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          {tag}
+                        </span>
                       ))}
                     </div>
                   </div>
                 </button>
               ))}
-
-              {/* Coming soon placeholder */}
-              <div className={`relative rounded-2xl border border-dashed border-white/[0.1] flex flex-col items-center justify-center text-center p-8 min-h-[220px] transition-all duration-700 ${projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: `${projects.length * 100 + 100}ms` }}>
-                <i className="fa-solid fa-plus text-white/20 text-xl mb-3" />
-                <p className="text-white/25 text-sm">More on the way</p>
-              </div>
             </div>
           </div>
         </div>
