@@ -168,6 +168,16 @@ const skills = [
   { name: 'Node.js',      pct: 72 },
 ];
 
+// Icon + brand color per skill for the About tag pills
+const skillMeta = {
+  'Python':       { icon: 'fa-brands fa-python',  color: '#4B8BBE' },
+  'JavaScript':   { icon: 'fa-brands fa-js',       color: '#F7DF1E' },
+  'TypeScript':   { icon: 'fa-solid fa-code',      color: '#3178C6' },
+  'React':        { icon: 'fa-brands fa-react',    color: '#61DAFB' },
+  'Tailwind CSS': { icon: 'fa-solid fa-wind',      color: '#38BDF8' },
+  'Node.js':      { icon: 'fa-brands fa-node-js',  color: '#3C873A' },
+};
+
 const projects = [
   {
     id: 1,
@@ -278,6 +288,14 @@ const formatGmt = (offMin) => {
   const h = Math.floor(abs / 60);
   const m = abs % 60;
   return `GMT${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
+};
+
+// Owner's home timezone (shown on the About card); delta computed vs. the visitor
+const OWNER_TZ = 'America/Denver';
+const tzOffsetMinutes = (date, tz) => {
+  const utc = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const local = new Date(date.toLocaleString('en-US', { timeZone: tz }));
+  return Math.round((local - utc) / 60000);
 };
 
 const formatTime = (t) => {
@@ -730,31 +748,65 @@ function App() {
   const [discordAvatar, setDiscordAvatar] = useState(null);
   const [discordStatus, setDiscordStatus] = useState('offline');
   const [discordBadges, setDiscordBadges] = useState([]);
+  const [discordName, setDiscordName] = useState('');
+  const [discordUsername, setDiscordUsername] = useState('');
+  const [discordActivities, setDiscordActivities] = useState([]);
+  const [activityAppIcon, setActivityAppIcon] = useState(null);
 
+  // Live Discord presence via Lanyard's WebSocket — status/avatar/badges update in real time
   useEffect(() => {
-    let cancelled = false;
-    const load = async (attempt = 0) => {
-      try {
-        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
-        const data = await res.json();
-        if (!data.success) throw new Error('lanyard unavailable');
-        if (cancelled) return;
-        const { id, avatar, public_flags, premium_type } = data.data.discord_user;
-        if (avatar) setDiscordAvatar(`https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`);
-        setDiscordStatus(data.data.discord_status || 'offline');
-        const badges = [];
-        if (premium_type && premium_type > 0) badges.push({ icon: 'nitro', label: 'Nitro' });
-        BADGE_FLAGS.forEach(({ flag, icon, label }) => {
-          if (public_flags & flag) badges.push({ icon, label });
-        });
-        badges.push({ icon: 'quest', label: 'Completed a Quest' });
-        setDiscordBadges(badges);
-      } catch {
-        if (!cancelled && attempt < 3) setTimeout(() => load(attempt + 1), 2500);
-      }
+    let ws, heartbeat, reconnect, closed = false;
+
+    const applyPresence = (p) => {
+      if (!p || !p.discord_user) return;
+      const { id, avatar, public_flags, premium_type, global_name, username } = p.discord_user;
+      if (avatar) setDiscordAvatar(`https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`);
+      setDiscordName(global_name || '');
+      setDiscordUsername(username || '');
+      setDiscordStatus(p.discord_status || 'offline');
+      setDiscordActivities(p.activities || []);
+      const badges = [];
+      if (premium_type && premium_type > 0) badges.push({ icon: 'nitro', label: 'Nitro' });
+      BADGE_FLAGS.forEach(({ flag, icon, label }) => {
+        if (public_flags & flag) badges.push({ icon, label });
+      });
+      badges.push({ icon: 'quest', label: 'Completed a Quest' });
+      setDiscordBadges(badges);
     };
-    load();
-    return () => { cancelled = true; };
+
+    const connect = () => {
+      try { ws = new WebSocket('wss://api.lanyard.rest/socket'); } catch { return; }
+      ws.onmessage = (e) => {
+        let msg;
+        try { msg = JSON.parse(e.data); } catch { return; }
+        if (msg.op === 1) {
+          // Hello — subscribe to our user, then heartbeat on the given interval
+          ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_USER_ID } }));
+          clearInterval(heartbeat);
+          heartbeat = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
+          }, msg.d?.heartbeat_interval || 30000);
+        } else if (msg.op === 0) {
+          // Event — INIT_STATE / PRESENCE_UPDATE (d is the presence, or keyed by id)
+          const d = msg.d;
+          applyPresence(d && d.discord_status ? d : (d ? d[DISCORD_USER_ID] : null));
+        }
+      };
+      ws.onclose = () => {
+        clearInterval(heartbeat);
+        if (!closed) reconnect = setTimeout(connect, 4000);
+      };
+      ws.onerror = () => { try { ws.close(); } catch {} };
+    };
+
+    connect();
+
+    return () => {
+      closed = true;
+      clearInterval(heartbeat);
+      clearTimeout(reconnect);
+      try { ws && ws.close(); } catch {}
+    };
   }, []);
 
 
@@ -805,6 +857,53 @@ function App() {
   const localDateStr = clockTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const localGmt = formatGmt(-clockTime.getTimezoneOffset());
 
+  // Owner's local time (Denver) for the About timezone card
+  const ownerParts = clockTime.toLocaleTimeString('en-GB', { timeZone: OWNER_TZ, hour12: false }).split(':').map(Number);
+  const ownerH = ownerParts[0] || 0, ownerM = ownerParts[1] || 0, ownerS = ownerParts[2] || 0;
+  const ownerTimeStr = [ownerH, ownerM, ownerS].map((n) => String(n).padStart(2, '0')).join(':');
+  const ownerDateStr = clockTime.toLocaleDateString('en-US', { timeZone: OWNER_TZ, weekday: 'short', month: 'short', day: 'numeric' });
+  const ownerGmt = formatGmt(tzOffsetMinutes(clockTime, OWNER_TZ));
+  const deltaMin = (-clockTime.getTimezoneOffset()) - tzOffsetMinutes(clockTime, OWNER_TZ);
+  const deltaH = deltaMin / 60;
+  const deltaStr = `${deltaMin >= 0 ? '+' : '−'}${Number.isInteger(deltaH) ? Math.abs(deltaH) : Math.abs(deltaH).toFixed(1)}h`;
+  const yourTimeStr = localTimeStr.slice(0, 5);
+
+  // Current Discord activity (game/app rich presence) — skips custom status + Spotify
+  const primaryActivity = discordActivities.find((a) => a.type !== 4 && a.name !== 'Spotify') || null;
+  const customStatus = discordActivities.find((a) => a.type === 4) || null;
+  const activityAsset = (img, appId) => {
+    if (!img) return null;
+    if (img.startsWith('mp:')) return `https://media.discordapp.net/${img.slice(3)}`;
+    return `https://cdn.discordapp.com/app-assets/${appId}/${img}.png`;
+  };
+  const activityImg = primaryActivity ? activityAsset(primaryActivity.assets?.large_image, primaryActivity.application_id) : null;
+  // Rich-presence buttons — labels from `buttons`, URLs from `metadata.button_urls` (http(s) only)
+  const activityButtons = (primaryActivity?.buttons || []).map((label, i) => {
+    const url = primaryActivity?.metadata?.button_urls?.[i];
+    return { label: String(label).slice(0, 32), url: typeof url === 'string' && /^https?:\/\//i.test(url) ? url : null };
+  });
+  const activityElapsed = (start) => {
+    const totalSec = Math.floor(Math.max(0, clockTime.getTime() - start) / 1000);
+    const h = Math.floor(totalSec / 3600), m = Math.floor((totalSec % 3600) / 60), s = totalSec % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  };
+
+  // When an activity has no rich-presence image, fall back to the Discord app's own icon
+  useEffect(() => {
+    if (!primaryActivity || primaryActivity.assets?.large_image || !primaryActivity.application_id) {
+      setActivityAppIcon(null);
+      return;
+    }
+    let cancelled = false;
+    const appId = primaryActivity.application_id;
+    fetch(`https://discord.com/api/v10/applications/${appId}/rpc`)
+      .then((r) => r.json())
+      .then((j) => { if (!cancelled && j.icon) setActivityAppIcon(`https://cdn.discordapp.com/app-icons/${appId}/${j.icon}.png`); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [primaryActivity?.application_id, primaryActivity?.assets?.large_image]);
+
 
 
   return (
@@ -814,6 +913,12 @@ function App() {
       
     >
       <style>{`
+        @font-face {
+          font-family: 'SiteFont';
+          src: url('/fonts/Supernatural_Knight.ttf') format('truetype');
+          font-display: swap;
+        }
+
         html, body, .snap-container {
           cursor: none !important;
         }
@@ -823,7 +928,7 @@ function App() {
         }
 
         body, h1, h2, h3 {
-          font-family: 'Geist', system-ui, -apple-system, sans-serif;
+          font-family: 'SiteFont', 'Geist', system-ui, -apple-system, sans-serif;
         }
 
         /* Social icons — plain white glyphs with an always-on glow */
@@ -895,6 +1000,13 @@ function App() {
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
 
       <Comments />
+
+      {/* Game library launcher — floating icon next to the chat button */}
+      <button onClick={() => setShowGameLibrary(true)} title="Game collection"
+        className="fixed top-4 right-16 z-[80] w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-125"
+        style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
+        <i className="fa-solid fa-gamepad text-xl" />
+      </button>
 
       {/* VOLUME — hidden on iOS (volume is hardware-only on iOS Safari) */}
       <div
@@ -1071,7 +1183,8 @@ function App() {
                 {/* Name */}
                 <h1 className="text-center text-[1.8rem] sm:text-[2.1rem] font-bold tracking-tight mb-2.5 sm:mb-3"
                   style={{
-                    backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.6) 42%, #ffffff 50%, rgba(255,255,255,0.6) 58%)',
+                    fontFamily: "'SiteFont', 'Geist', sans-serif",
+                    backgroundImage: 'linear-gradient(110deg, rgba(255,255,255,0.9) 42%, #ffffff 50%, rgba(255,255,255,0.9) 58%)',
                     backgroundSize: '250% 100%',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
@@ -1126,13 +1239,13 @@ function App() {
                 </div>
 
                 {/* Cycling text — crossfade, old word fully out before the next enters */}
-                <div className="relative h-5 mb-5 sm:mb-6">
+                <div className="relative h-6 mb-5 sm:mb-6">
                   <AnimatePresence mode="wait">
                     <motion.span key={currentFadeIndex}
                       initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.45, ease: 'easeInOut' }}
-                      className="absolute inset-0 flex items-center justify-center text-[10px] sm:text-[11px] tracking-[4px] uppercase whitespace-nowrap"
-                      style={{ color: `${ACCENT}bb` }}>
+                      className="absolute inset-0 flex items-center justify-center text-[14px] sm:text-[16px] tracking-[4px] uppercase whitespace-nowrap"
+                      style={{ color: 'rgba(255,255,255,0.95)', textShadow: '0 0 8px rgba(255,255,255,0.55), 0 0 18px rgba(255,255,255,0.3)' }}>
                       {fadeTexts[currentFadeIndex]}
                     </motion.span>
                   </AnimatePresence>
@@ -1238,115 +1351,159 @@ function App() {
           </button>
         </div>
 
-        {/* PAGE 2 — About Me (sidebar identity rail + content column) */}
+        {/* PAGE 2 — About Me (bio pill + profile/timezone cards + skill tags) */}
         <div ref={aboutRef} className="snap-section min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 border-t border-white/[0.06]">
-          <div className="max-w-[900px] w-full mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-stretch">
+          <div className="max-w-[720px] w-full mx-auto">
 
-            {/* ── Identity rail ── */}
-            <div className={`order-2 lg:order-1 flex-shrink-0 lg:w-[230px] transition-all duration-700 delay-200 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.07] overflow-hidden h-full
-                flex lg:flex-col items-center lg:justify-center gap-4 lg:gap-0 p-4 lg:p-6 lg:text-center">
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-40 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: `${ACCENT}14` }} />
+            {/* Heading */}
+            <h2 className={`text-3xl sm:text-4xl font-bold text-white mb-5 tracking-tight transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              About me
+            </h2>
 
-                {/* Avatar + status */}
+            {/* Bio pill */}
+            <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] px-6 py-5 mb-4 transition-all duration-700 delay-75 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <p className="text-white/70 text-sm sm:text-[15px] leading-relaxed">
+                Hi, Avy here — developer &amp; programmer based in <span className="text-white font-medium">Denver, CO</span>. Currently working at <span className="text-white font-medium">Amazon Robotics</span>. Open to new opportunities.
+              </p>
+            </div>
+
+            {/* Info cards */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+
+              {/* Profile card */}
+              <div className="rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 flex items-center gap-4">
                 <div className="relative flex-shrink-0">
-                  <div className="w-14 h-14 lg:w-[72px] lg:h-[72px] rounded-full p-[2px]"
-                    style={{ background: `linear-gradient(135deg, ${ACCENT}aa, rgba(255,255,255,0.1) 60%)` }}>
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Avatar" />
-                    </div>
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
+                    <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Avatar" />
                   </div>
-                  <span className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[#0a0a0a] ${
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[2.5px] border-[#0a0a0a] ${
                     discordStatus === 'online' ? 'bg-emerald-400' :
                     discordStatus === 'idle'   ? 'bg-yellow-400' :
                     discordStatus === 'dnd'    ? 'bg-red-500' : 'bg-zinc-500'
                   }`} />
                 </div>
-
-                {/* Name + status text */}
-                <div className="flex-1 lg:flex-none min-w-0 lg:mt-3">
-                  <p className="text-sm font-semibold text-white truncate">Avy.js</p>
-                  <p className={`text-[11px] mt-0.5 ${
-                    discordStatus === 'online' ? 'text-emerald-400' :
-                    discordStatus === 'idle'   ? 'text-yellow-400' :
-                    discordStatus === 'dnd'    ? 'text-red-400' : 'text-white/35'
-                  }`}>
-                    {discordStatus === 'online' ? '● Online' : discordStatus === 'idle' ? '● Idle' : discordStatus === 'dnd' ? '● Do Not Disturb' : '● Offline'}
-                  </p>
+                <div className="min-w-0">
+                  <p className="text-white font-semibold text-[15px] leading-tight truncate">{discordName || SITE_CONFIG.username}</p>
+                  {discordUsername && (
+                    <p className="font-mono text-[11px] text-white/40 leading-tight mt-0.5 truncate">@{discordUsername}</p>
+                  )}
+                  {customStatus && (customStatus.state || customStatus.emoji) ? (
+                    <p className="text-white/55 text-xs mt-1 flex items-center gap-1.5 min-w-0">
+                      {customStatus.emoji && (
+                        customStatus.emoji.id ? (
+                          <img src={`https://cdn.discordapp.com/emojis/${customStatus.emoji.id}.${customStatus.emoji.animated ? 'gif' : 'png'}`} alt="" className="w-3.5 h-3.5 flex-shrink-0" />
+                        ) : (
+                          <span className="flex-shrink-0 leading-none">{customStatus.emoji.name}</span>
+                        )
+                      )}
+                      {customStatus.state && <span className="truncate">{customStatus.state}</span>}
+                    </p>
+                  ) : (
+                    <p className="text-white/40 text-xs italic mt-1">
+                      {discordStatus === 'online' ? 'Online now' : discordStatus === 'idle' ? 'Idle' : discordStatus === 'dnd' ? 'Do not disturb' : 'Offline'}
+                    </p>
+                  )}
                 </div>
+              </div>
 
-                <div className="hidden lg:block w-full h-px bg-white/[0.07] my-4" />
-
-                {/* Availability */}
-                <div className="hidden lg:flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399] flex-shrink-0" />
-                  <span className="font-mono text-[10px] text-white/35 tracking-wide">Available for work</span>
+              {/* Timezone / clock card */}
+              <div className="relative rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 flex items-center gap-4">
+                <span className="absolute top-3 right-4 flex items-center gap-1 text-white/25 text-[10px] font-mono">
+                  <i className="fa-regular fa-clock text-[9px]" /> Timezone
+                </span>
+                <div className="relative w-14 h-14 flex-shrink-0 rounded-full"
+                  style={{
+                    background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1), rgba(8,12,24,0.95) 72%)',
+                    border: '2px solid rgba(255,255,255,0.22)',
+                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.65), 0 2px 10px rgba(0,0,0,0.45)',
+                  }}>
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    i % 3 !== 0 && (
+                      <span key={i} className="absolute left-1/2 top-1/2 w-px h-[3px] rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.4)', transform: `translate(-50%, -50%) rotate(${i * 30}deg) translateY(-22px)` }} />
+                    )
+                  ))}
+                  <span className="absolute left-1/2 top-1/2 w-[2.5px] h-[13px] bg-white/90 rounded-full"
+                    style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(ownerH % 12) * 30 + ownerM * 0.5}deg)` }} />
+                  <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[19px] bg-white/70 rounded-full"
+                    style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerM * 6 + ownerS * 0.1}deg)` }} />
+                  <span className="absolute left-1/2 top-1/2 w-px h-[26px] rounded-full"
+                    style={{ background: ACCENT, transformOrigin: '50% 77%', transform: `translate(-50%, -77%) rotate(${ownerS * 6}deg)` }} />
+                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[5px] h-[5px] rounded-full border border-white/90" style={{ background: ACCENT }} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-mono text-lg font-semibold text-white tabular-nums leading-tight">{ownerTimeStr}</p>
+                  <p className="font-mono text-[11px] text-white/40">{ownerDateStr} · {ownerGmt}</p>
+                  <p className="font-mono text-[10px] text-white/25 mt-0.5">Your time: {yourTimeStr} ({deltaStr})</p>
                 </div>
               </div>
             </div>
 
-            {/* ── Content column ── */}
-            <div className="order-1 lg:order-2 flex-1 min-w-0">
-
-              {/* Header */}
-              <div className={`mb-4 transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                <div className="flex items-center gap-2.5 mb-2">
-                  <span className="w-6 h-px" style={{ background: ACCENT }} />
-                  <p className="font-mono text-[10px] tracking-[4px] uppercase" style={{ color: `${ACCENT}cc` }}>01 / About</p>
-                </div>
-                <h2 className="text-4xl sm:text-5xl font-bold tracking-tighter"
-                  style={{ background: 'linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  Who I am
-                </h2>
-              </div>
-
-              {/* Bio */}
-              <p className={`text-white/60 text-[13px] sm:text-[15px] leading-relaxed mb-5 transition-all duration-700 delay-100 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                Hi, Avy here — developer &amp; programmer based in <span className="text-white/90 font-medium">Denver, CO</span>. Currently working at <span className="text-white/90 font-medium">Amazon Robotics</span>. Open to new opportunities.
-              </p>
-
-              {/* Skills — two-column grid */}
-              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mb-6 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                {skills.map((skill, i) => (
-                  <div key={skill.name}>
-                    <div className="flex justify-between mb-1">
-                      <span className="font-mono text-[10px] text-white/50">{skill.name}</span>
-                      <span className="font-mono text-[10px] text-white/25">{skill.pct}%</span>
+            {/* Current Discord activity */}
+            {primaryActivity && (
+              <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <div className="flex items-center gap-4">
+                  {(activityImg || activityAppIcon) ? (
+                    <img src={activityImg || activityAppIcon} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0 border border-white/10" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10" style={{ background: `${ACCENT}12` }}>
+                      <i className="fa-solid fa-gamepad text-lg" style={{ color: ACCENT }} />
                     </div>
-                    <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                      <div className="h-full rounded-full transition-all ease-out"
-                        style={{
-                          width: aboutVisible ? `${skill.pct}%` : '0%',
-                          transitionDuration: '900ms',
-                          transitionDelay: `${i * 80 + 200}ms`,
-                          background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT}55)`,
-                        }} />
-                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: `${ACCENT}cc` }}>
+                      {primaryActivity.type === 1 ? 'Streaming' : primaryActivity.type === 3 ? 'Watching' : primaryActivity.type === 5 ? 'Competing in' : 'Playing'}
+                    </p>
+                    <p className="text-white font-semibold text-[15px] leading-tight truncate mt-0.5">{primaryActivity.name}</p>
+                    {primaryActivity.details && <p className="text-white/50 text-xs truncate mt-0.5">{primaryActivity.details}</p>}
+                    {primaryActivity.state && <p className="text-white/40 text-xs truncate">{primaryActivity.state}</p>}
+                    {Array.isArray(primaryActivity.party?.size) && primaryActivity.party.size.length === 2 && (
+                      <p className="text-white/40 text-xs flex items-center gap-1.5 mt-0.5">
+                        <i className="fa-solid fa-user-group text-[9px]" style={{ color: ACCENT }} />
+                        {primaryActivity.party.size[0]} of {primaryActivity.party.size[1]} in party
+                      </p>
+                    )}
                   </div>
-                ))}
-              </div>
-
-              {/* Game collection */}
-              <div className={`transition-all duration-700 delay-300 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="font-mono text-[10px] tracking-[3px] text-white/25 uppercase">Game Collection</p>
-                  <button onClick={() => setShowGameLibrary(true)} className="font-mono text-[10px] text-white/30 hover:text-white/70 flex items-center gap-1.5 transition-colors duration-150">
-                    VIEW ALL <i className="fa-solid fa-arrow-right text-[8px]" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-5 gap-2">
-                  {gameLibrary.slice(0, 5).map((game, i) => (
-                    <div key={game.id} onClick={() => { setCurrentGameIndex(i); setShowGameLibrary(true); }} className="group cursor-pointer">
-                      <div className="relative aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden border border-white/[0.08] bg-black/30">
-                        <img src={game.cover} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className={`hidden sm:block absolute top-1.5 right-1.5 px-1.5 py-0.5 text-[7px] font-semibold rounded-full ${getStatusColor(game.status)}`}>{game.status}</div>
-                      </div>
-                      <p className="hidden sm:block mt-1.5 font-mono text-[10px] line-clamp-1 text-white/35 group-hover:text-white/75 transition-colors duration-200">{game.title}</p>
+                  {primaryActivity.timestamps?.start && (
+                    <div className="flex-shrink-0 text-right">
+                      <p className="font-mono text-[9px] text-white/25 uppercase tracking-wider">elapsed</p>
+                      <p className="font-mono text-sm text-white/70 tabular-nums leading-tight">{activityElapsed(primaryActivity.timestamps.start)}</p>
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {/* Rich-presence buttons */}
+                {activityButtons.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {activityButtons.map((b, i) => (
+                      b.url ? (
+                        <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+                          style={{ background: `${ACCENT}1f`, border: `1px solid ${ACCENT}55`, color: '#fff' }}>
+                          <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" style={{ color: ACCENT }} /> {b.label}
+                        </a>
+                      ) : (
+                        <span key={i} className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-medium"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+                          {b.label}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                )}
               </div>
+            )}
+
+            {/* Skill tags */}
+            <div className={`flex flex-wrap gap-2.5 mb-6 transition-all duration-700 delay-200 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              {skills.map((s) => {
+                const m = skillMeta[s.name] || { icon: 'fa-solid fa-code', color: ACCENT };
+                return (
+                  <span key={s.name} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/[0.04] border border-white/[0.07] text-white/75 text-[13px] font-medium">
+                    <i className={`${m.icon} text-[13px]`} style={{ color: m.color }} /> {s.name}
+                  </span>
+                );
+              })}
             </div>
 
           </div>
