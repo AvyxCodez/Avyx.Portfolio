@@ -5,8 +5,8 @@ import App from './App.jsx'
 import './index.css'
 
 const titles = [
-  "@A V Y X",
-  "D E V"
+  "AvyxCodez",
+  "Developer"
 ];
 
 let currentIndex = 0;
