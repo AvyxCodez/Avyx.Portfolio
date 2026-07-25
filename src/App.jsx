@@ -493,6 +493,7 @@ function App() {
   const enterSite = () => {
     setShowEnter(false);
     incrementViews();
+    ensureAnalyser(); // create/resume the audio graph within the click gesture
     if (videoRef.current) videoRef.current.play().catch(() => {});
 
     setTimeout(() => {
@@ -588,6 +589,11 @@ function App() {
 
   const audioRef = useRef(null);
   const videoRef = useRef(null);
+  const audioCtxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const vizDataRef = useRef(null);
+  const vizCanvasRef = useRef(null);
+  const vizRafRef = useRef(0);
   const snapContainerRef = useRef(null);
   const lyricsContainerRef = useRef(null);
   const currentLyricRef = useRef(null);
@@ -716,12 +722,63 @@ function App() {
     if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
 
+  // Web Audio graph for the visualizer — created once, on the first user gesture
+  const ensureAnalyser = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    try {
+      if (!audioCtxRef.current) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const source = ctx.createMediaElementSource(audio);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.82;
+        source.connect(analyser);
+        analyser.connect(ctx.destination);
+        audioCtxRef.current = ctx;
+        analyserRef.current = analyser;
+        vizDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+      }
+      if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
+    } catch { /* tainted/unsupported — audio still plays, visualizer stays flat */ }
+  };
+
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) audio.play().catch(() => {});
+    if (audio.paused) { ensureAnalyser(); audio.play().catch(() => {}); }
     else audio.pause();
   };
+
+  // Visualizer draw loop — real frequency bars while the music section is on screen
+  useEffect(() => {
+    if (!musicVisible) { cancelAnimationFrame(vizRafRef.current); return; }
+    const draw = () => {
+      const canvas = vizCanvasRef.current;
+      if (canvas) {
+        const c = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        c.clearRect(0, 0, w, h);
+        const analyser = analyserRef.current, data = vizDataRef.current;
+        if (analyser && data) analyser.getByteFrequencyData(data);
+        const bars = 44, bw = w / bars;
+        const usable = data ? Math.floor(data.length * 0.7) : 0;
+        for (let i = 0; i < bars; i++) {
+          let v = 0;
+          if (usable) { v = data[Math.floor((i / bars) * usable)] / 255; v *= v; }
+          const barH = Math.max(h * 0.05, v * h);
+          const x = i * bw;
+          c.fillStyle = `rgba(255,255,255,${0.28 + v * 0.72})`;
+          c.fillRect(x + bw * 0.22, h - barH, bw * 0.56, barH);
+        }
+      }
+      vizRafRef.current = requestAnimationFrame(draw);
+    };
+    vizRafRef.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(vizRafRef.current);
+  }, [musicVisible]);
 
   const handleSeek = (e) => {
     if (audioRef.current) audioRef.current.currentTime = parseFloat(e.target.value);
@@ -1614,6 +1671,9 @@ function App() {
                     className="w-full aspect-square rounded-2xl object-cover shadow-2xl" />
                 </AnimatePresence>
 
+                {/* Audio visualizer — live frequency bars */}
+                <canvas ref={vizCanvasRef} width={680} height={80} className="w-full h-10 mt-4" />
+
                 {/* Title + equalizer */}
                 <div className="flex items-center justify-between gap-3 mt-5">
                   <AnimatePresence mode="wait">
@@ -1737,7 +1797,7 @@ function App() {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={nextSong} />
+      <audio ref={audioRef} onEnded={nextSong} crossOrigin="anonymous" />
 
       {/* GAME LIBRARY MODAL */}
       <AnimatePresence>
