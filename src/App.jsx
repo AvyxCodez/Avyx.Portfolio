@@ -123,7 +123,6 @@ const SITE_CONFIG = {
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
   bgType: "gif",
   bgValue: "/background.gif",
-  audioLoop: true,
 };
 
 const DISCORD_USER_ID = "825785012468056155";
@@ -1143,25 +1142,25 @@ function App() {
                 <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
 
                 {/* Social icons */}
-                <div className="flex justify-center items-center gap-4 sm:gap-[18px] text-white/90">
+                <div className="flex justify-center items-center gap-3 sm:gap-[14px] text-white/90">
                   <a href="https://discord.com/users/825785012468056155" target="_blank" rel="noopener noreferrer" aria-label="Discord"
-                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    className="social-ico text-4xl sm:text-[2.4rem] leading-none">
                     <i className="fa-brands fa-discord" />
                   </a>
                   <a href="#" aria-label="GitHub"
-                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    className="social-ico text-4xl sm:text-[2.4rem] leading-none">
                     <i className="fa-brands fa-github" />
                   </a>
                   <a href="#" aria-label="Email"
-                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    className="social-ico text-4xl sm:text-[2.4rem] leading-none">
                     <i className="fa-solid fa-envelope" />
                   </a>
                   <a href="#" aria-label="Telegram"
-                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    className="social-ico text-4xl sm:text-[2.4rem] leading-none">
                     <i className="fa-brands fa-telegram" />
                   </a>
                   <a href="#" aria-label="Website"
-                    className="social-ico text-3xl sm:text-[2.4rem] leading-none">
+                    className="social-ico text-4xl sm:text-[2.4rem] leading-none">
                     <i className="fa-solid fa-globe" />
                   </a>
                 </div>
@@ -1564,7 +1563,7 @@ function App() {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={nextSong} loop={SITE_CONFIG.audioLoop} />
+      <audio ref={audioRef} onEnded={nextSong} />
 
       {/* GAME LIBRARY MODAL */}
       <AnimatePresence>
