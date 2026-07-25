@@ -3,6 +3,7 @@ import { AnimatePresence, motion, animate } from "motion/react";
 import { Particles } from './components/Particles';
 import useCanvasCursor from "./components/useCanvasCursor";
 import Comments from "./components/Comments";
+import Oneko from "./components/Oneko";
 
 
 function DiscordBadgeIcon({ icon }) {
@@ -1091,6 +1092,7 @@ function App() {
       <Particles className="absolute inset-0 z-30" quantity={70} ease={80} staticity={40} />
 
       <Comments />
+      {!showEnter && <Oneko />}
 
       {/* Game library launcher — floating icon next to the chat button */}
       <button onClick={() => setShowGameLibrary(true)} title="Game collection"
