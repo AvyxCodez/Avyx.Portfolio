@@ -135,10 +135,13 @@ const IS_DEV = window.location.hostname === "localhost" || window.location.hostn
 const fadeTexts = ["Welcome", "Developer", "WebDev", "Programmer"];
 
 const songs = [
+  // lrcTitle/lrcArtist override the display metadata when looking lyrics up —
+  // LRCLIB indexes canonical track titles and a single primary artist.
   {
     id: 1,
     title: "Exit Music",
     artist: "Radiohead",
+    lrcTitle: "Exit Music (For a Film)",
     url: "https://lumora-io.vercel.app/f/JUFbTc.mp3",
     albumArt: "/art-exit-music.jpeg",
   },
@@ -155,6 +158,7 @@ const songs = [
     id: 3,
     title: "Young Forever",
     artist: "JAY-Z, Mr Hudson",
+    lrcArtist: "JAY-Z",
     url: "https://lumora-io.vercel.app/f/SBwQje.mp3",
     albumArt: "/art-young-forever.jpg",
   },
@@ -299,6 +303,23 @@ const tzOffsetMinutes = (date, tz) => {
   const utc = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
   const local = new Date(date.toLocaleString('en-US', { timeZone: tz }));
   return Math.round((local - utc) / 60000);
+};
+
+// Parse an LRC blob into sorted {time, text} lines. A single line may carry
+// several timestamps (`[00:12.00][01:30.00]same words`) — emit one entry each.
+const LRC_STAMP = /\[(\d+):(\d+(?:\.\d+)?)\]/g;
+const parseLrc = (raw) => {
+  const out = [];
+  for (const line of raw.split('\n')) {
+    const stamps = [...line.matchAll(LRC_STAMP)];
+    if (!stamps.length) continue;
+    const text = line.replace(LRC_STAMP, '').trim();
+    if (!text) continue;
+    for (const s of stamps) {
+      out.push({ time: parseInt(s[1], 10) * 60 + parseFloat(s[2]), text });
+    }
+  }
+  return out.sort((a, b) => a.time - b.time);
 };
 
 const formatTime = (t) => {
@@ -511,52 +532,66 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.5);
 
-  // Lyrics
+  // Lyrics — 'loading' | 'ok' | 'none' (track has no synced lyrics) | 'error'
+  // (couldn't reach LRCLIB). Keeping those last two apart matters: they used to
+  // render the same message, which made an outage look like a missing track.
   const [lyrics, setLyrics] = useState([]);
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
-  const [lyricsLoading, setLyricsLoading] = useState(false);
+  const [lyricsState, setLyricsState] = useState('loading');
+  const [lyricsAttempt, setLyricsAttempt] = useState(0);
+  const lyricsCache = useRef(new Map());
 
   useEffect(() => {
-    const fetchLyrics = async () => {
-      setLyrics([]);
-      setLyricsLoading(true);
+    const song = currentSong;
+    const cached = lyricsCache.current.get(song.id);
+    if (cached) {
+      setLyrics(cached);
+      setLyricsState(cached.length ? 'ok' : 'none');
+      return;
+    }
 
-      try {
-        const originalUrl = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(currentSong.artist)}&track_name=${encodeURIComponent(currentSong.title)}`;
-        const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const fetchUrl = isLocalhost 
-          ? `https://corsproxy.io/?${encodeURIComponent(originalUrl)}` 
-          : originalUrl;
+    let cancelled = false;
+    setLyrics([]);
+    setLyricsState('loading');
 
-        const res = await fetch(fetchUrl);
-        if (!res.ok) {
-          setLyricsLoading(false);
-          return;
-        }
-
-        const data = await res.json();
-        if (data.syncedLyrics) {
-          const parsed = data.syncedLyrics
-            .split('\n')
-            .map(line => {
-              const match = /\[(\d+):(\d+\.?\d*)\]/.exec(line);
-              if (!match) return null;
-              const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
-              const text = line.replace(match[0], '').trim();
-              return text ? { time, text } : null;
-            })
-            .filter(Boolean);
-          setLyrics(parsed);
-        }
-      } catch (error) {
-        console.error("Lyrics fetch error:", error);
-      } finally {
-        setLyricsLoading(false);
-      }
+    // Both environments hit the same URL: a Vercel function in prod, a Vite dev proxy locally.
+    const call = async (params) => {
+      const res = await fetch(`/api/lrclib?${new URLSearchParams(params)}`);
+      if (res.status === 404) return null;        // no match — not a failure
+      if (!res.ok) throw new Error(`lyrics ${res.status}`);
+      return res.json();
     };
 
-    fetchLyrics();
-  }, [currentSong]);
+    (async () => {
+      const track = song.lrcTitle || song.title;
+      const artist = song.lrcArtist || song.artist;
+
+      try {
+        // Exact lookup first — cheapest, and precise when the metadata lines up.
+        // (No duration hint: this runs the moment the track changes, before the
+        // audio element has loaded metadata for it.)
+        let hit = await call({ endpoint: 'get', artist_name: artist, track_name: track });
+
+        // Otherwise fall back to fuzzy search and take the best synced match.
+        if (!hit?.syncedLyrics) {
+          const results = (await call({ endpoint: 'search', q: `${track} ${artist}` })) || [];
+          hit = results.find((r) => r.syncedLyrics);
+        }
+
+        if (cancelled) return;
+        const parsed = hit?.syncedLyrics ? parseLrc(hit.syncedLyrics) : [];
+        lyricsCache.current.set(song.id, parsed);
+        setLyrics(parsed);
+        setLyricsState(parsed.length ? 'ok' : 'none');
+      } catch (error) {
+        if (cancelled) return;
+        console.error('Lyrics fetch error:', error);
+        setLyricsState('error');
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [currentSong, lyricsAttempt]);
 
   useEffect(() => {
     if (lyrics.length === 0) return;
@@ -1808,8 +1843,18 @@ function App() {
                           maskImage: 'linear-gradient(to bottom, transparent, white 12%, white 82%, transparent)',
                           WebkitMaskImage: 'linear-gradient(to bottom, transparent, white 12%, white 82%, transparent)',
                         }}>
-                        {lyricsLoading ? (
+                        {lyricsState === 'loading' ? (
                           <p className="text-white/30 text-sm pt-12">Loading lyrics…</p>
+                        ) : lyricsState === 'error' ? (
+                          <div className="pt-12 flex flex-col items-center gap-2.5">
+                            <p className="text-white/30 text-sm">Couldn’t reach the lyrics service</p>
+                            <button onClick={() => setLyricsAttempt((n) => n + 1)}
+                              className="px-3.5 py-1.5 rounded-full text-xs font-medium text-white/70 hover:text-white transition-all"
+                              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                              <i className="fa-solid fa-rotate-right text-[10px] mr-1.5" />
+                              Retry
+                            </button>
+                          </div>
                         ) : lyrics.length > 0 ? (
                           <>
                             <div style={{ height: '50px', flexShrink: 0 }} />
