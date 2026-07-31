@@ -7,6 +7,10 @@ const DEV_KEY = 'avyx-comments';
 const devRead = () => { try { return JSON.parse(localStorage.getItem(DEV_KEY) || '[]'); } catch { return []; } };
 const devWrite = (list) => localStorage.setItem(DEV_KEY, JSON.stringify(list));
 
+// The site-wide display face (SiteFont) is decorative and hurts readability at
+// comment sizes — keep this panel on a plain sans stack.
+const BODY_FONT = "'Geist', system-ui, -apple-system, sans-serif";
+
 const formatDate = (ts) => {
   const d = new Date(ts);
   return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
@@ -144,7 +148,7 @@ export default function Comments() {
 
   const Panel = (
     <div className={`relative overflow-hidden ${isMobile ? 'rounded-t-[2rem]' : 'rounded-2xl'}`}
-      style={{ background: 'rgba(8,8,12,0.97)', border: '1px solid rgba(255,255,255,0.07)' }}>
+      style={{ background: 'rgba(8,8,12,0.97)', border: '1px solid rgba(255,255,255,0.07)', fontFamily: BODY_FONT }}>
 
       {/* Top accent gradient bar */}
       <div className="absolute top-0 left-0 right-0 h-px"
