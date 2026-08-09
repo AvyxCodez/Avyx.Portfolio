@@ -630,17 +630,36 @@ function App() {
   const [activeSection, setActiveSection] = useState(0);
   const activeSectionRef = useRef(0);
   const isScrollingRef = useRef(false);
+  // Bumped to abandon an in-flight section transition; a running animation
+  // stops as soon as it sees the token move on without it.
+  const scrollAnimRef = useRef(0);
   const TOTAL_SECTIONS = 4;
 
   // Force section heights to match window.innerHeight exactly (fixes iOS Safari 100vh vs dvh mismatch)
   useEffect(() => {
+    let lastHeight = 0;
     const setSectionHeights = () => {
       const h = window.innerHeight;
+      const heightChanged = h !== lastHeight;
+      lastHeight = h;
       document.querySelectorAll('.snap-section').forEach(el => {
         el.style.height = `${h}px`;
         el.style.minHeight = `${h}px`;
       });
-      if (snapContainerRef.current) snapContainerRef.current.style.height = `${h}px`;
+      const container = snapContainerRef.current;
+      if (!container) return;
+      container.style.height = `${h}px`;
+      if (!heightChanged) return;
+
+      // Sections are stacked at fixed pixel heights, so once those change the
+      // scroll offset that pointed at the current one lands between two — a
+      // phone rotation would leave the visitor looking at half of each page.
+      // Realign on whichever section is meant to be showing, and abandon any
+      // transition still running, since it was aiming at the old geometry.
+      scrollAnimRef.current++;
+      isScrollingRef.current = false;
+      const target = container.querySelectorAll('.snap-section')[activeSectionRef.current];
+      if (target) container.scrollTop = target.offsetTop;
     };
     setSectionHeights();
     window.addEventListener('resize', setSectionHeights);
@@ -648,12 +667,14 @@ function App() {
   }, []);
 
   const smoothScrollTo = (container, targetY, duration = 900) => {
+    const token = ++scrollAnimRef.current;
     const startY = container.scrollTop;
     const diff = targetY - startY;
     if (diff === 0) { isScrollingRef.current = false; return; }
     const startTime = performance.now();
     const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const step = (now) => {
+      if (scrollAnimRef.current !== token) return;   // superseded — stop animating
       const progress = Math.min((now - startTime) / duration, 1);
       container.scrollTop = startY + diff * ease(progress);
       if (progress < 1) requestAnimationFrame(step);
