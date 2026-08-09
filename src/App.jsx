@@ -122,8 +122,8 @@ const SITE_CONFIG = {
   username: "AvyxCodez",
   // Stable fallback while the live Discord avatar loads (attachment links expire)
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
-  bgType: "gif",
-  bgValue: "/background.gif",
+  bgType: "video",
+  bgValue: "https://pub-ecdd182e7e304629985ed5bec0ca9790.r2.dev/MaNyil.mp4",
 };
 
 const DISCORD_USER_ID = "825785012468056155";
@@ -341,12 +341,16 @@ function App() {
   useEffect(() => {
     let cancelled = false;
 
-    const imgPromise = new Promise((resolve) => {
-      const img = new Image();
-      img.onload = resolve;
-      img.onerror = resolve;
-      img.src = SITE_CONFIG.bgValue;
-    });
+    // A still background can be waited on outright. A video can't — it streams,
+    // so gating the preloader on it would hold the site behind the whole file.
+    const bgPromise = SITE_CONFIG.bgType === 'video'
+      ? Promise.resolve()
+      : new Promise((resolve) => {
+          const img = new Image();
+          img.onload = resolve;
+          img.onerror = resolve;
+          img.src = SITE_CONFIG.bgValue;
+        });
     const minDelay = new Promise((resolve) => setTimeout(resolve, 1600));
 
     const t0 = performance.now();
@@ -358,7 +362,7 @@ function App() {
     };
     requestAnimationFrame(step);
 
-    Promise.all([imgPromise, minDelay]).then(() => {
+    Promise.all([bgPromise, minDelay]).then(() => {
       if (cancelled) return;
       setLoadProgress(100);
       setTimeout(() => { if (!cancelled) setSiteLoading(false); }, 350);
@@ -510,14 +514,17 @@ function App() {
     setShowEnter(false);
     incrementViews();
     ensureAnalyser(); // create/resume the audio graph within the click gesture
-    if (videoRef.current) videoRef.current.play().catch(() => {});
+    // The background video carries the sound, so unmute it here and leave the
+    // music player stopped. It has to happen inside the click: autoplay is only
+    // permitted while muted, and nothing but a user gesture can lift that.
+    const video = videoRef.current;
+    if (video) {
+      video.muted = false;
+      video.volume = volume;
+      video.play().catch(() => {});
+    }
 
-    setTimeout(() => {
-      setShowProfile(true);
-      if (audioRef.current) {
-        audioRef.current.play().catch(() => {});
-      }
-    }, 350);
+    setTimeout(() => setShowProfile(true), 350);
   };
 
   const [currentSong, setCurrentSong] = useState(songs[0]);
@@ -827,7 +834,19 @@ function App() {
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
+    // The video is audible too, so the volume control has to reach it or it
+    // would appear to do nothing while the background is the only sound.
+    if (videoRef.current) videoRef.current.volume = volume;
   }, [volume]);
+
+  // Only one of the two should be audible. The music player wins while it's
+  // running; the background takes the sound back when it stops. Held off until
+  // the visitor is in, since unmuting before that gesture just pauses the video.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || showEnter || SITE_CONFIG.bgType !== 'video') return;
+    video.muted = isPlaying;
+  }, [isPlaying, showEnter]);
 
   // Web Audio graph for the visualizer — created once, on the first user gesture
   const ensureAnalyser = () => {
@@ -1187,7 +1206,8 @@ function App() {
       {/* Background */}
       <div className="fixed inset-0 z-0">
         {SITE_CONFIG.bgType === 'video' && (
-          <video ref={videoRef} src={SITE_CONFIG.bgValue} loop muted playsInline className="fixed inset-0 w-full h-full object-cover" />
+          <video ref={videoRef} src={SITE_CONFIG.bgValue} loop autoPlay muted playsInline
+            className="fixed inset-0 w-full h-full object-cover" />
         )}
         {(SITE_CONFIG.bgType === 'gif' || SITE_CONFIG.bgType === 'image') && (
           <img src={SITE_CONFIG.bgValue} alt="Background" className="fixed inset-0 w-full h-full object-cover" />
