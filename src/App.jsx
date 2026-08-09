@@ -712,7 +712,8 @@ function App() {
     const container = snapContainerRef.current;
     if (!container) return;
     let touchStartY = 0;
-    let touchStartScrollTop = 0;
+    let touchStartAtTop = true;
+    let touchStartAtEnd = true;
 
     const onWheel = (e) => {
       const dir = e.deltaY > 0 ? 1 : -1;
@@ -725,18 +726,22 @@ function App() {
     };
     const onTouchStart = (e) => {
       touchStartY = e.touches[0].clientY;
-      touchStartScrollTop = scrollableSection()?.el.scrollTop ?? 0;
+      // Record where the section stands as the gesture begins. Reading this at
+      // touchend instead would be wrong: momentum scrolling keeps the section
+      // gliding after the finger lifts, so at that moment it still looks like
+      // it has room left and the page would never advance.
+      const s = scrollableSection();
+      touchStartAtTop = !s || s.el.scrollTop <= 2;
+      touchStartAtEnd = !s || s.el.scrollTop >= s.max - 2;
     };
     const onTouchEnd = (e) => {
       if (isScrollingRef.current) return;
       const delta = touchStartY - e.changedTouches[0].clientY;
       if (Math.abs(delta) < 40) return;
       const dir = delta > 0 ? 1 : -1;
-      // A swipe that scrolled the section was aimed at its content, not at the
-      // next page — don't spend it twice by also advancing.
-      const s = scrollableSection();
-      if (s && Math.abs(s.el.scrollTop - touchStartScrollTop) > 1) return;
-      if (canScrollWithin(dir)) return;
+      // Swiping from the edge the visitor is heading for changes page; anywhere
+      // else in a scrollable section, the swipe belongs to its content.
+      if (dir > 0 ? !touchStartAtEnd : !touchStartAtTop) return;
       scrollToSection(activeSectionRef.current + dir);
     };
     const onKey = (e) => {
