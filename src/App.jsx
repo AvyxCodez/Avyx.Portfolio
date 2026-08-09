@@ -299,14 +299,6 @@ const formatGmt = (offMin) => {
   return `GMT${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
 };
 
-// Owner's home timezone (shown on the About card); delta computed vs. the visitor
-const OWNER_TZ = 'America/Denver';
-const tzOffsetMinutes = (date, tz) => {
-  const utc = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-  const local = new Date(date.toLocaleString('en-US', { timeZone: tz }));
-  return Math.round((local - utc) / 60000);
-};
-
 // Parse an LRC blob into sorted {time, text} lines. A single line may carry
 // several timestamps (`[00:12.00][01:30.00]same words`) — emit one entry each.
 const LRC_STAMP = /\[(\d+):(\d+(?:\.\d+)?)\]/g;
@@ -1045,17 +1037,6 @@ function App() {
   const localDateStr = clockTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const localGmt = formatGmt(-clockTime.getTimezoneOffset());
 
-  // Owner's local time (Denver) for the About timezone card
-  const ownerParts = clockTime.toLocaleTimeString('en-GB', { timeZone: OWNER_TZ, hour12: false }).split(':').map(Number);
-  const ownerH = ownerParts[0] || 0, ownerM = ownerParts[1] || 0, ownerS = ownerParts[2] || 0;
-  const ownerTimeStr = [ownerH, ownerM, ownerS].map((n) => String(n).padStart(2, '0')).join(':');
-  const ownerDateStr = clockTime.toLocaleDateString('en-US', { timeZone: OWNER_TZ, weekday: 'short', month: 'short', day: 'numeric' });
-  const ownerGmt = formatGmt(tzOffsetMinutes(clockTime, OWNER_TZ));
-  const deltaMin = (-clockTime.getTimezoneOffset()) - tzOffsetMinutes(clockTime, OWNER_TZ);
-  const deltaH = deltaMin / 60;
-  const deltaStr = `${deltaMin >= 0 ? '+' : '−'}${Number.isInteger(deltaH) ? Math.abs(deltaH) : Math.abs(deltaH).toFixed(1)}h`;
-  const yourTimeStr = localTimeStr.slice(0, 5);
-
   // Current Discord activity (game/app rich presence) — skips custom status + Spotify
   const primaryActivity = discordActivities.find((a) => a.type !== 4 && a.name !== 'Spotify') || null;
   const customStatus = discordActivities.find((a) => a.type === 4) || null;
@@ -1583,11 +1564,8 @@ function App() {
               </p>
             </div>
 
-            {/* Info cards */}
-            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-
-              {/* Profile card */}
-              <div className="rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 flex items-center gap-4">
+            {/* Profile card */}
+            <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 flex items-center gap-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 <div className="relative flex-shrink-0">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
                     <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Avatar" />
@@ -1620,39 +1598,6 @@ function App() {
                     </p>
                   )}
                 </div>
-              </div>
-
-              {/* Timezone / clock card */}
-              <div className="relative rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 flex items-center gap-4">
-                <span className="absolute top-3 right-4 flex items-center gap-1 text-white/25 text-[10px] font-mono">
-                  <i className="fa-regular fa-clock text-[9px]" /> Timezone
-                </span>
-                <div className="relative w-14 h-14 flex-shrink-0 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1), rgba(8,12,24,0.95) 72%)',
-                    border: '2px solid rgba(255,255,255,0.22)',
-                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.65), 0 2px 10px rgba(0,0,0,0.45)',
-                  }}>
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    i % 3 !== 0 && (
-                      <span key={i} className="absolute left-1/2 top-1/2 w-px h-[3px] rounded-full"
-                        style={{ background: 'rgba(255,255,255,0.4)', transform: `translate(-50%, -50%) rotate(${i * 30}deg) translateY(-22px)` }} />
-                    )
-                  ))}
-                  <span className="absolute left-1/2 top-1/2 w-[2.5px] h-[13px] bg-white/90 rounded-full"
-                    style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${(ownerH % 12) * 30 + ownerM * 0.5}deg)` }} />
-                  <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[19px] bg-white/70 rounded-full"
-                    style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${ownerM * 6 + ownerS * 0.1}deg)` }} />
-                  <span className="absolute left-1/2 top-1/2 w-px h-[26px] rounded-full"
-                    style={{ background: ACCENT, transformOrigin: '50% 77%', transform: `translate(-50%, -77%) rotate(${ownerS * 6}deg)` }} />
-                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[5px] h-[5px] rounded-full border border-white/90" style={{ background: ACCENT }} />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-mono text-lg font-semibold text-white tabular-nums leading-tight">{ownerTimeStr}</p>
-                  <p className="font-mono text-[11px] text-white/40">{ownerDateStr} · {ownerGmt}</p>
-                  <p className="font-mono text-[10px] text-white/25 mt-0.5">Your time: {yourTimeStr} ({deltaStr})</p>
-                </div>
-              </div>
             </div>
 
             {/* Current Discord activity */}
