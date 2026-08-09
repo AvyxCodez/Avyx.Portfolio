@@ -670,15 +670,41 @@ function App() {
     requestAnimationFrame(step);
   };
 
+  // The section currently on screen, but only if it genuinely scrolls. The
+  // overflow check matters: a section with visible overflow still reports
+  // scrollHeight > clientHeight while refusing to scroll, and treating that as
+  // scrollable would strand the visitor on it with no way forward.
+  const scrollableSection = () => {
+    const el = snapContainerRef.current?.querySelectorAll('.snap-section')[activeSectionRef.current];
+    if (!el) return null;
+    const { overflowY } = getComputedStyle(el);
+    if (overflowY !== 'auto' && overflowY !== 'scroll') return null;
+    const max = el.scrollHeight - el.clientHeight;
+    return max > 1 ? { el, max } : null;
+  };
+
+  // True while the section still has room to scroll the way the visitor is
+  // going — the page should only advance once they've reached that edge.
+  const canScrollWithin = (dir) => {
+    const s = scrollableSection();
+    if (!s) return false;
+    return dir > 0 ? s.el.scrollTop < s.max - 1 : s.el.scrollTop > 1;
+  };
+
   const scrollToSection = (index) => {
     const container = snapContainerRef.current;
     if (!container) return;
     const clamped = Math.max(0, Math.min(TOTAL_SECTIONS - 1, index));
+    const goingUp = clamped < activeSectionRef.current;
     activeSectionRef.current = clamped;
     setActiveSection(clamped);
     isScrollingRef.current = true;
     const sections = container.querySelectorAll('.snap-section');
-    const targetY = sections[clamped]?.offsetTop ?? clamped * window.innerHeight;
+    const target = sections[clamped];
+    // Enter a taller-than-viewport section at the edge the visitor is arriving
+    // from, so scrolling up through it walks the content instead of skipping it.
+    if (target) target.scrollTop = goingUp ? target.scrollHeight - target.clientHeight : 0;
+    const targetY = target?.offsetTop ?? clamped * window.innerHeight;
     smoothScrollTo(container, targetY);
   };
 
@@ -686,23 +712,48 @@ function App() {
     const container = snapContainerRef.current;
     if (!container) return;
     let touchStartY = 0;
+    let touchStartScrollTop = 0;
 
     const onWheel = (e) => {
+      const dir = e.deltaY > 0 ? 1 : -1;
+      // Leave the event alone so the browser scrolls the section natively; the
+      // page only moves on once that section has nothing left to show.
+      if (canScrollWithin(dir)) return;
       e.preventDefault();
       if (isScrollingRef.current) return;
-      scrollToSection(activeSectionRef.current + (e.deltaY > 0 ? 1 : -1));
+      scrollToSection(activeSectionRef.current + dir);
     };
-    const onTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
+    const onTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartScrollTop = scrollableSection()?.el.scrollTop ?? 0;
+    };
     const onTouchEnd = (e) => {
       if (isScrollingRef.current) return;
       const delta = touchStartY - e.changedTouches[0].clientY;
       if (Math.abs(delta) < 40) return;
-      scrollToSection(activeSectionRef.current + (delta > 0 ? 1 : -1));
+      const dir = delta > 0 ? 1 : -1;
+      // A swipe that scrolled the section was aimed at its content, not at the
+      // next page — don't spend it twice by also advancing.
+      const s = scrollableSection();
+      if (s && Math.abs(s.el.scrollTop - touchStartScrollTop) > 1) return;
+      if (canScrollWithin(dir)) return;
+      scrollToSection(activeSectionRef.current + dir);
     };
     const onKey = (e) => {
       if (isScrollingRef.current) return;
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); scrollToSection(activeSectionRef.current + 1); }
-      if (e.key === 'ArrowUp'   || e.key === 'PageUp')   { e.preventDefault(); scrollToSection(activeSectionRef.current - 1); }
+      const down = e.key === 'ArrowDown' || e.key === 'PageDown';
+      const up = e.key === 'ArrowUp' || e.key === 'PageUp';
+      if (!down && !up) return;
+      const dir = down ? 1 : -1;
+      e.preventDefault();
+      // Scroll the section explicitly rather than leaving it to the browser,
+      // which only moves a scroll container that happens to hold focus.
+      const s = canScrollWithin(dir) ? scrollableSection() : null;
+      if (s) {
+        s.el.scrollBy({ top: dir * Math.round(s.el.clientHeight * 0.8), behavior: 'smooth' });
+        return;
+      }
+      scrollToSection(activeSectionRef.current + dir);
     };
 
     container.addEventListener('wheel', onWheel, { passive: false });
@@ -1512,7 +1563,7 @@ function App() {
         </div>
 
         {/* PAGE 2 — About Me (bio pill + profile/timezone cards + skill tags) */}
-        <div ref={aboutRef} className="snap-section min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 border-t border-white/[0.06]">
+        <div ref={aboutRef} className="snap-section snap-section--scroll min-h-screen flex flex-col px-4 sm:px-6 py-10 border-t border-white/[0.06]">
           <div className="max-w-[720px] w-full mx-auto">
 
             {/* Heading */}

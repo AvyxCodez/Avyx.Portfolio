@@ -20,6 +20,29 @@
   justify-content: center;
 }
 
+/* A section whose content can outgrow the locked viewport height scrolls inside
+   itself instead of being clipped. Centering has to move to auto margins on the
+   child (see .snap-section--scroll > *): `justify-content: center` clips the
+   overflowing top edge and leaves it permanently unreachable, since the outer
+   container is overflow:hidden and the wheel handler moves whole sections.
+   Declared after .snap-section so it wins on source order at equal specificity,
+   rather than depending on where Tailwind's CDN styles land relative to this. */
+.snap-section--scroll {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.snap-section--scroll > * {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.snap-section--scroll::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   font-family: 'Geist', system-ui, -apple-system, sans-serif;
 }
