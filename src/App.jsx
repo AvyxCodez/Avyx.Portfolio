@@ -1206,8 +1206,13 @@ function App() {
       {/* Background */}
       <div className="fixed inset-0 z-0">
         {SITE_CONFIG.bgType === 'video' && (
+          // Blur samples past the element's edges, which would leave a soft
+          // transparent border against the page. Oversizing pushes that band
+          // off-screen: 12% clears the 5px blur's ~15px spread even at 375px
+          // wide, where the narrow axis gives the least margin to work with.
           <video ref={videoRef} src={SITE_CONFIG.bgValue} loop autoPlay muted playsInline
-            className="fixed inset-0 w-full h-full object-cover" />
+            className="fixed inset-0 w-full h-full object-cover"
+            style={{ filter: 'blur(5px)', transform: 'scale(1.12)' }} />
         )}
         {(SITE_CONFIG.bgType === 'gif' || SITE_CONFIG.bgType === 'image') && (
           <img src={SITE_CONFIG.bgValue} alt="Background" className="fixed inset-0 w-full h-full object-cover" />
