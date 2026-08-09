@@ -130,6 +130,8 @@ const DISCORD_USER_ID = "825785012468056155";
 
 const ACCENT = "#60a5fa";
 
+const SPOTIFY_GREEN = "#1DB954";
+
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 const fadeTexts = ["Welcome", "Developer", "WebDev", "Programmer"];
@@ -879,6 +881,7 @@ function App() {
   const [discordUsername, setDiscordUsername] = useState('');
   const [discordActivities, setDiscordActivities] = useState([]);
   const [activityAppIcon, setActivityAppIcon] = useState(null);
+  const [spotify, setSpotify] = useState(null);
 
   // Live Discord presence via Lanyard's WebSocket — status/avatar/badges update in real time
   useEffect(() => {
@@ -892,6 +895,8 @@ function App() {
       setDiscordUsername(username || '');
       setDiscordStatus(p.discord_status || 'offline');
       setDiscordActivities(p.activities || []);
+      // Lanyard hands us a purpose-built spotify object; it's null when idle.
+      setSpotify(p.listening_to_spotify && p.spotify ? p.spotify : null);
       const badges = [];
       if (premium_type && premium_type > 0) badges.push({ icon: 'nitro', label: 'Nitro' });
       BADGE_FLAGS.forEach(({ flag, icon, label }) => {
@@ -1015,6 +1020,17 @@ function App() {
     const pad = (n) => String(n).padStart(2, '0');
     return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
   };
+
+  // Spotify playback position, recomputed off the clock tick that's already running.
+  const spotifyProgress = (() => {
+    const { start, end } = spotify?.timestamps || {};
+    if (!start || !end || end <= start) return null;
+    const total = end - start;
+    const elapsed = Math.min(Math.max(clockTime.getTime() - start, 0), total);
+    return { pct: (elapsed / total) * 100, elapsed: elapsed / 1000, total: total / 1000 };
+  })();
+  // Lanyard joins multiple artists with semicolons — read better as a comma list.
+  const spotifyArtist = spotify?.artist?.replace(/;\s*/g, ', ') || '';
 
   // When an activity has no rich-presence image, fall back to the Discord app's own icon
   useEffect(() => {
@@ -1633,6 +1649,45 @@ function App() {
                         </span>
                       )
                     ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Spotify — live "now listening", straight from Lanyard */}
+            {spotify && (
+              <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <button
+                  onClick={() => spotify.track_id && openExternalLink(`https://open.spotify.com/track/${spotify.track_id}`, 'Spotify')}
+                  disabled={!spotify.track_id}
+                  className="group w-full flex items-center gap-4 text-left">
+                  {spotify.album_art_url ? (
+                    <img src={spotify.album_art_url} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0 border border-white/10" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10" style={{ background: `${SPOTIFY_GREEN}12` }}>
+                      <i className="fa-brands fa-spotify text-lg" style={{ color: SPOTIFY_GREEN }} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5" style={{ color: SPOTIFY_GREEN }}>
+                      <i className="fa-brands fa-spotify text-[11px]" /> Listening on Spotify
+                    </p>
+                    <p className="text-white font-semibold text-[15px] leading-tight truncate mt-0.5 group-hover:underline">{spotify.song}</p>
+                    {spotifyArtist && <p className="text-white/50 text-xs truncate mt-0.5">{spotifyArtist}</p>}
+                    {spotify.album && <p className="text-white/30 text-[11px] truncate">on {spotify.album}</p>}
+                  </div>
+                </button>
+
+                {spotifyProgress && (
+                  <div className="mt-3.5">
+                    <div className="relative h-[3px] rounded-full bg-white/15">
+                      <div className="absolute left-0 top-0 h-full rounded-full"
+                        style={{ width: `${spotifyProgress.pct}%`, background: SPOTIFY_GREEN }} />
+                    </div>
+                    <div className="flex justify-between mt-1.5">
+                      <span className="font-mono text-[10px] text-white/35 tabular-nums">{formatTime(spotifyProgress.elapsed)}</span>
+                      <span className="font-mono text-[10px] text-white/35 tabular-nums">{formatTime(spotifyProgress.total)}</span>
+                    </div>
                   </div>
                 )}
               </div>
