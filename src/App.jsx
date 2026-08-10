@@ -134,7 +134,7 @@ const SPOTIFY_GREEN = "#1DB954";
 
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-const fadeTexts = ["Welcome", "Developer", "WebDev", "Programmer"];
+const fadeTexts = ["Welcome", "Open to work"];
 
 const songs = [
   // lrcTitle/lrcArtist override the display metadata when looking lyrics up —
