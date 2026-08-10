@@ -1607,7 +1607,7 @@ function App() {
             {/* Bio pill */}
             <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] px-6 py-5 mb-4 transition-all duration-700 delay-75 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <p className="text-white/70 text-sm sm:text-[15px] leading-relaxed">
-                Hi, Avy here — developer &amp; programmer based in <span className="text-white font-medium">Denver, CO</span>. Currently working at <span className="text-white font-medium">Amazon Robotics</span>. Open to new opportunities.
+                Hi, Avyx here, welcome to my bio link website! i am a developer and programmer based in the <span className="text-white font-medium">United States</span>, graduated from <span className="text-white font-medium">CSU</span> with a <span className="text-white font-medium">Computer Science</span> degree, i am currently employed at <span className="text-white font-medium">Amazon</span>! I am open to new opportunities though hit me up! ((:
               </p>
             </div>
 
