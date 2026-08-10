@@ -136,6 +136,19 @@ const IS_DEV = window.location.hostname === "localhost" || window.location.hostn
 
 const fadeTexts = ["Welcome", "Open to work"];
 
+// Letters lift and sharpen one after another instead of the word fading in as
+// a block — a stagger reads as deliberate where a crossfade reads as flicker.
+const FADE_LETTER = {
+  out: { opacity: 0, y: 14, filter: 'blur(8px)' },
+  in: { opacity: 1, y: 0, filter: 'blur(0px)' },
+};
+// Exit runs quicker and in reverse, so a word peels away from the end rather
+// than replaying its entrance backwards.
+const FADE_WORD = {
+  in: { transition: { staggerChildren: 0.042, delayChildren: 0.04 } },
+  out: { transition: { staggerChildren: 0.022, staggerDirection: -1 } },
+};
+
 const songs = [
   // lrcTitle/lrcArtist override the display metadata when looking lyrics up —
   // LRCLIB indexes canonical track titles and a single primary artist.
@@ -1480,15 +1493,21 @@ function App() {
                   </span>
                 </div>
 
-                {/* Cycling text — crossfade, old word fully out before the next enters */}
+                {/* Cycling text — letters stagger in, then the whole word peels away */}
                 <div className="relative h-6 mb-5 sm:mb-6">
                   <AnimatePresence mode="wait">
                     <motion.span key={currentFadeIndex}
-                      initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.45, ease: 'easeInOut' }}
+                      variants={FADE_WORD} initial="out" animate="in" exit="out"
                       className="absolute inset-0 flex items-center justify-center text-[14px] sm:text-[16px] tracking-[4px] uppercase whitespace-nowrap"
                       style={{ color: 'rgba(255,255,255,0.95)', textShadow: '0 0 8px rgba(255,255,255,0.55), 0 0 18px rgba(255,255,255,0.3)' }}>
-                      {fadeTexts[currentFadeIndex]}
+                      {[...fadeTexts[currentFadeIndex]].map((ch, i) => (
+                        <motion.span key={i} variants={FADE_LETTER}
+                          transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                          className="inline-block">
+                          {/* A bare space collapses inside a flex row — hold it open */}
+                          {ch === ' ' ? ' ' : ch}
+                        </motion.span>
+                      ))}
                     </motion.span>
                   </AnimatePresence>
                 </div>
