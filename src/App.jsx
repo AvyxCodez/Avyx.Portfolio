@@ -392,6 +392,20 @@ function App() {
   const [showLyrics, setShowLyrics] = useState(false);
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  // Tracked separately from hover so a drag that wanders off the track doesn't
+  // collapse the slider mid-adjustment.
+  const [volumeDragging, setVolumeDragging] = useState(false);
+
+  useEffect(() => {
+    if (!volumeDragging) return;
+    const end = () => setVolumeDragging(false);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    return () => {
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+  }, [volumeDragging]);
 
   // Tilt Effect
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -1237,50 +1251,37 @@ function App() {
 
       {/* VOLUME — hidden on iOS (volume is hardware-only on iOS Safari) */}
       <div
-        className={`fixed top-4 left-4 z-[80] transition-all duration-300 ${activeSection === 3 || /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`fixed top-4 left-4 z-[80] flex items-center transition-opacity duration-300 ${activeSection === 3 || /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         onMouseEnter={() => setShowVolumeSlider(true)}
         onMouseLeave={() => setShowVolumeSlider(false)}
       >
         {/* Icon button */}
-        <button className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-125"
+        <button aria-label="Volume"
+          className="w-10 h-10 flex-shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-125"
           style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
           <i className={`fa-solid ${volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'} text-xl`}></i>
         </button>
 
-        {/* Popup card */}
-        <AnimatePresence>
-          {showVolumeSlider && (
-            <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.95 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="absolute top-12 left-0 w-52 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-white/40 tracking-wider font-medium">VOLUME</span>
-                <span className="text-xs text-white/70 font-mono tabular-nums">{Math.round(volume * 100)}%</span>
-              </div>
-
-              {/* Custom track */}
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-volume-low text-white/25 text-[10px]"></i>
-                <div className="relative flex-1 h-1.5 bg-white/15 rounded-full">
-                  <div
-                    className="absolute left-0 top-0 h-full bg-white rounded-full pointer-events-none transition-all duration-75"
-                    style={{ width: `${volume * 100}%` }}
-                  />
-                  <input
-                    type="range" min="0" max="1" step="0.01" value={volume}
-                    onChange={handleVolumeChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                </div>
-                <i className="fa-solid fa-volume-high text-white/25 text-[10px]"></i>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Track unrolls alongside the icon rather than dropping a panel below
+            it. Width drives the reveal, so it stays out of the way entirely at
+            rest instead of sitting invisible over the page. */}
+        <div className={`overflow-hidden transition-all duration-300 ease-out ${
+          showVolumeSlider || volumeDragging ? 'w-28 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0'
+        }`}>
+          {/* Capsule with no thumb, thickening while dragged — the iOS shape */}
+          <div className={`relative rounded-full transition-all duration-150 ${volumeDragging ? 'h-3' : 'h-2'}`}
+            style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.18)' }}>
+            <div className="absolute left-0 top-0 h-full rounded-full bg-white pointer-events-none"
+              style={{ width: `${volume * 100}%`, boxShadow: '0 0 10px rgba(255,255,255,0.5)' }} />
+            <input
+              type="range" min="0" max="1" step="0.01" value={volume}
+              onChange={handleVolumeChange}
+              onPointerDown={() => setVolumeDragging(true)}
+              aria-label="Volume level"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
+        </div>
       </div>
 
       {/* VIEW COUNTER + LOCATION */}
