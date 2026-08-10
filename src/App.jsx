@@ -1463,7 +1463,7 @@ function App() {
                     <i className="fa-solid fa-code text-[8px]" /> Developer
                   </span>
                   <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/45">
-                    <i className="fa-solid fa-location-dot text-[8px]" /> Denver
+                    <i className="fa-solid fa-terminal text-[8px]" /> Programmer
                   </span>
                   <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1 rounded-full border ${
                     discordStatus === 'online' ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' :
