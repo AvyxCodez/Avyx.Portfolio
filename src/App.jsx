@@ -123,7 +123,7 @@ const SITE_CONFIG = {
   // Stable fallback while the live Discord avatar loads (attachment links expire)
   pfp: "https://cdn.discordapp.com/embed/avatars/3.png",
   bgType: "video",
-  bgValue: "https://pub-ecdd182e7e304629985ed5bec0ca9790.r2.dev/MaNyil.mp4",
+  bgValue: "https://pub-ecdd182e7e304629985ed5bec0ca9790.r2.dev/Nbr2j1.mp4",
 };
 
 const DISCORD_USER_ID = "825785012468056155";
