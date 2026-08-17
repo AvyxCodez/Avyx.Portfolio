@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+﻿import { useState, useEffect, useRef } from 'react';
+import { m, AnimatePresence } from 'motion/react';
 
-// Local dev has no serverless functions — fall back to localStorage
+// Local dev has no serverless functions â€” fall back to localStorage
 const IS_DEV = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const DEV_KEY = 'avyx-comments';
 const devRead = () => { try { return JSON.parse(localStorage.getItem(DEV_KEY) || '[]'); } catch { return []; } };
 const devWrite = (list) => localStorage.setItem(DEV_KEY, JSON.stringify(list));
 
 // The site-wide display face (SiteFont) is decorative and hurts readability at
-// comment sizes — keep this panel on a plain sans stack.
+// comment sizes â€” keep this panel on a plain sans stack.
 const BODY_FONT = "'Geist', system-ui, -apple-system, sans-serif";
 
 const formatDate = (ts) => {
@@ -49,7 +49,7 @@ export default function Comments() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
 
-  // Moderation — unlocked by triple-clicking the note counter in the header
+  // Moderation â€” unlocked by triple-clicking the note counter in the header
   const [adminKey, setAdminKey] = useState(() => localStorage.getItem('avyx-admin-key') || '');
   const modClicks = useRef({ n: 0, t: 0 });
 
@@ -88,7 +88,7 @@ export default function Comments() {
       if (r.status === 401) {
         localStorage.removeItem('avyx-admin-key');
         setAdminKey('');
-        setError('Wrong admin key — moderation locked again.');
+        setError('Wrong admin key â€” moderation locked again.');
         setShowForm(true);
         return;
       }
@@ -158,7 +158,7 @@ export default function Comments() {
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-10 blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
 
-      {/* Drag handle — mobile only */}
+      {/* Drag handle â€” mobile only */}
       {isMobile && (
         <div className="flex justify-center pt-4 pb-2">
           <div className="w-9 h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
@@ -175,7 +175,7 @@ export default function Comments() {
           <div>
             <p className="text-sm font-semibold text-white leading-none">Comments</p>
             <p onClick={handleModTap} className="text-[10px] font-mono mt-0.5 select-none" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              {comments.length} {comments.length === 1 ? 'note' : 'notes'}{adminKey ? ' · mod' : ''}
+              {comments.length} {comments.length === 1 ? 'note' : 'notes'}{adminKey ? ' Â· mod' : ''}
             </p>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function Comments() {
       {/* Form */}
       <AnimatePresence>
         {showForm && (
-          <motion.form onSubmit={submit}
+          <m.form onSubmit={submit}
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }}
             className="overflow-hidden"
@@ -237,11 +237,11 @@ export default function Comments() {
                 <button type="submit" disabled={submitting}
                   className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
                   style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
-                  {submitting ? 'Posting…' : 'Post →'}
+                  {submitting ? 'Postingâ€¦' : 'Post â†’'}
                 </button>
               </div>
             </div>
-          </motion.form>
+          </m.form>
         )}
       </AnimatePresence>
 
@@ -269,7 +269,7 @@ export default function Comments() {
           sorted.map((c, idx) => {
             const [from, to] = gradientAvatar(c.name);
             return (
-              <motion.div key={c.id}
+              <m.div key={c.id}
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04, duration: 0.2 }}
                 className="group flex gap-3.5 px-5 py-4 transition-all cursor-default"
@@ -299,13 +299,13 @@ export default function Comments() {
                     {c.message}
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             );
           })
         )}
       </div>
 
-      {/* Bottom safe area — mobile */}
+      {/* Bottom safe area â€” mobile */}
       {isMobile && <div className="h-6" />}
     </div>
   );
@@ -322,7 +322,7 @@ export default function Comments() {
       <AnimatePresence>
         {open && (
           <>
-            <motion.div key="bd"
+            <m.div key="bd"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setOpen(false)}
@@ -330,16 +330,16 @@ export default function Comments() {
               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} />
 
             {isMobile ? (
-              <motion.div key="sheet"
+              <m.div key="sheet"
                 initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 32, stiffness: 320 }}
                 drag="y" dragConstraints={{ top: 0 }} dragElastic={{ top: 0, bottom: 0.4 }}
                 onDragEnd={(_, info) => { if (info.offset.y > 80) setOpen(false); }}
                 className="fixed bottom-0 left-0 right-0 z-[91] pointer-events-auto">
                 {Panel}
-              </motion.div>
+              </m.div>
             ) : (
-              <motion.div key="modal"
+              <m.div key="modal"
                 initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -347,7 +347,7 @@ export default function Comments() {
                 <div className="pointer-events-auto w-full max-w-lg">
                   {Panel}
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </>
         )}

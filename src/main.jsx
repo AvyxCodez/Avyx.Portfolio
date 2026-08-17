@@ -1,5 +1,6 @@
-import React from 'react'
+﻿import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { LazyMotion } from 'motion/react'
 import { Analytics } from '@vercel/analytics/react'
 import App from './App.jsx'
 import './index.css'
@@ -25,7 +26,7 @@ function typeTitle() {
 
   document.title = currentText || ",";
 
-  let typeSpeed = isDeleting ? 120 : 220;   // ← Slower typing & deleting
+  let typeSpeed = isDeleting ? 120 : 220;   // â† Slower typing & deleting
 
   if (!isDeleting && currentText === fullText) {
     typeSpeed = 2200; // Pause longer when fully typed
@@ -42,9 +43,15 @@ function typeTitle() {
 // Start the typewriter effect
 typeTitle();
 
+// Motion's features load once here rather than being bundled into every `m`
+// component, and asynchronously so they land in their own chunk instead of the
+// entry bundle. `m` elements render their `initial` styles until the features
+// resolve, so the first paint is correct and animation picks up from there.
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <LazyMotion features={() => import('./motion-features.js').then((m) => m.default)}>
+      <App />
+    </LazyMotion>
     <Analytics />
   </React.StrictMode>,
 )
