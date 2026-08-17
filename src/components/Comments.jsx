@@ -217,14 +217,14 @@ export default function Comments() {
             <div className="px-5 py-4 flex flex-col gap-3">
               <input value={name} onChange={e => setName(e.target.value)}
                 placeholder="Your name" maxLength={32}
-                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all"
+                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-hidden transition-all"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#3b82f6' }}
                 onFocus={e => e.target.style.borderColor = 'rgba(96,165,250,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
               />
               <textarea value={message} onChange={e => setMessage(e.target.value)}
                 placeholder="Say something..." maxLength={200} rows={3}
-                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-all resize-none"
+                className="w-full rounded-xl px-4 py-2.5 text-sm text-white outline-hidden transition-all resize-none"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', caretColor: '#3b82f6' }}
                 onFocus={e => e.target.style.borderColor = 'rgba(96,165,250,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
@@ -277,19 +277,19 @@ export default function Comments() {
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 {/* Gradient avatar */}
-                <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-xs font-bold uppercase"
+                <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-white text-xs font-bold uppercase"
                   style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 4px 12px ${from}40` }}>
                   {c.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-sm font-semibold text-white truncate">{c.name}</span>
-                    <span className="text-[10px] font-mono flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <span className="text-[10px] font-mono shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       {formatDate(c.created_at)}
                     </span>
                     {adminKey && (
                       <button onClick={() => deleteComment(c.id)} title="Delete comment"
-                        className="flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-all hover:bg-red-500/20"
+                        className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-all hover:bg-red-500/20"
                         style={{ color: 'rgba(248,113,113,0.7)' }}>
                         <i className="fa-solid fa-trash text-[9px]" />
                       </button>

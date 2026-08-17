@@ -1,13 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* These live in the components layer so Tailwind's utilities still win over
-   them, which is what the CDN build did implicitly: it injected its stylesheet
-   after this file, so a utility in the markup always beat a rule here. Compiled
-   at build time the utilities move to the top of this file instead, and without
-   a layer the rules below would start overriding the markup — .snap-container
-   would take overflow:hidden away from its own overflow-y-scroll class. */
+   them. Under v4 that's a real CSS cascade layer rather than a source-order
+   convention, so the browser enforces it: a utility in the markup beats a rule
+   here no matter where this file lands. Without the layer .snap-container would
+   take overflow:hidden away from its own overflow-y-scroll class. */
 @layer components {
   .snap-container {
     overflow: hidden;

@@ -1269,7 +1269,7 @@ function App() {
       >
         {/* Icon button */}
         <button aria-label="Volume"
-          className="w-10 h-10 flex-shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-125"
+          className="w-10 h-10 shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-125"
           style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
           <i className={`fa-solid ${volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'} text-xl`}></i>
         </button>
@@ -1512,7 +1512,7 @@ function App() {
                 </div>
 
                 {/* Gradient divider */}
-                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
+                <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
 
                 {/* Social icons */}
                 <div className="flex justify-center items-center gap-3 sm:gap-[14px] text-white/90">
@@ -1549,7 +1549,7 @@ function App() {
             <div className="flex items-center justify-center gap-4 px-4 py-3.5">
 
               {/* Analog face — visitor's local time */}
-              <div className="relative w-14 h-14 flex-shrink-0 rounded-full"
+              <div className="relative w-14 h-14 shrink-0 rounded-full"
                 style={{
                   background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1), rgba(8,12,24,0.95) 72%)',
                   border: '2px solid rgba(255,255,255,0.22)',
@@ -1631,7 +1631,7 @@ function App() {
 
             {/* Profile card */}
             <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 flex items-center gap-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                <div className="relative flex-shrink-0">
+                <div className="relative shrink-0">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
                     <img src={discordAvatar || SITE_CONFIG.pfp} className="w-full h-full object-cover" alt="Avatar" />
                   </div>
@@ -1650,9 +1650,9 @@ function App() {
                     <p className="text-white/55 text-xs mt-1 flex items-center gap-1.5 min-w-0">
                       {customStatus.emoji && (
                         customStatus.emoji.id ? (
-                          <img src={`https://cdn.discordapp.com/emojis/${customStatus.emoji.id}.${customStatus.emoji.animated ? 'gif' : 'png'}`} alt="" className="w-3.5 h-3.5 flex-shrink-0" />
+                          <img src={`https://cdn.discordapp.com/emojis/${customStatus.emoji.id}.${customStatus.emoji.animated ? 'gif' : 'png'}`} alt="" className="w-3.5 h-3.5 shrink-0" />
                         ) : (
-                          <span className="flex-shrink-0 leading-none">{customStatus.emoji.name}</span>
+                          <span className="shrink-0 leading-none">{customStatus.emoji.name}</span>
                         )
                       )}
                       {customStatus.state && <span className="truncate">{customStatus.state}</span>}
@@ -1670,9 +1670,9 @@ function App() {
               <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 <div className="flex items-center gap-4">
                   {(activityImg || activityAppIcon) ? (
-                    <img src={activityImg || activityAppIcon} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0 border border-white/10" />
+                    <img src={activityImg || activityAppIcon} alt="" className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-white/10" />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10" style={{ background: `${ACCENT}12` }}>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-white/10" style={{ background: `${ACCENT}12` }}>
                       <i className="fa-solid fa-gamepad text-lg" style={{ color: ACCENT }} />
                     </div>
                   )}
@@ -1691,7 +1691,7 @@ function App() {
                     )}
                   </div>
                   {primaryActivity.timestamps?.start && (
-                    <div className="flex-shrink-0 text-right">
+                    <div className="shrink-0 text-right">
                       <p className="font-mono text-[9px] text-white/25 uppercase tracking-wider">elapsed</p>
                       <p className="font-mono text-sm text-white/70 tabular-nums leading-tight">{activityElapsed(primaryActivity.timestamps.start)}</p>
                     </div>
@@ -1728,9 +1728,9 @@ function App() {
                   disabled={!spotify.track_id}
                   className="group w-full flex items-center gap-4 text-left">
                   {spotify.album_art_url ? (
-                    <img src={spotify.album_art_url} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0 border border-white/10" />
+                    <img src={spotify.album_art_url} alt="" className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-white/10" />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10" style={{ background: `${SPOTIFY_GREEN}12` }}>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-white/10" style={{ background: `${SPOTIFY_GREEN}12` }}>
                       <i className="fa-brands fa-spotify text-lg" style={{ color: SPOTIFY_GREEN }} />
                     </div>
                   )}
@@ -1891,7 +1891,7 @@ function App() {
                     </motion.div>
                   </AnimatePresence>
                   {isPlaying && (
-                    <span className="flex gap-[3px] items-end h-4 flex-shrink-0">
+                    <span className="flex gap-[3px] items-end h-4 shrink-0">
                       {[0.6, 1, 0.75, 0.45].map((h, i) => (
                         <span key={i} className="w-[3px] bg-white/80 rounded-full animate-pulse"
                           style={{ height: `${h * 100}%`, animationDelay: `${i * 0.15}s` }} />
@@ -2058,7 +2058,7 @@ function App() {
               <div className="relative z-10 flex" style={{ minHeight: '480px', maxHeight: '88vh' }}>
 
                 {/* Sidebar — game list */}
-                <div className="hidden sm:flex flex-col w-56 flex-shrink-0 border-r border-white/[0.07] overflow-y-auto">
+                <div className="hidden sm:flex flex-col w-56 shrink-0 border-r border-white/[0.07] overflow-y-auto">
                   <div className="px-4 pt-5 pb-3 border-b border-white/[0.06]">
                     <p className="font-mono text-[10px] tracking-[3px] text-white/30 uppercase">Collection</p>
                     <p className="text-[11px] text-white/20 mt-0.5">{gameLibrary.length} games</p>
@@ -2074,7 +2074,7 @@ function App() {
                             : 'hover:bg-white/[0.05] border border-transparent'
                         }`}
                       >
-                        <div className="relative w-9 h-9 flex-shrink-0 rounded-lg overflow-hidden border border-white/[0.08]">
+                        <div className="relative w-9 h-9 shrink-0 rounded-lg overflow-hidden border border-white/[0.08]">
                           <img src={game.cover} alt={game.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0">
@@ -2095,7 +2095,7 @@ function App() {
                 <div className="flex-1 min-w-0 flex flex-col sm:flex-row overflow-hidden">
 
                   {/* Cover art */}
-                  <div className="sm:w-56 lg:w-64 flex-shrink-0 p-4 flex items-start justify-center">
+                  <div className="sm:w-56 lg:w-64 shrink-0 p-4 flex items-start justify-center">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentGame.id + '-cover'}
@@ -2106,7 +2106,7 @@ function App() {
                         className="relative w-full rounded-xl overflow-hidden border border-white/[0.1] shadow-2xl aspect-video sm:aspect-[3/4]"
                       >
                         <img src={currentGame.cover} alt={currentGame.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
                         <div className={`absolute bottom-2.5 left-2.5 px-2.5 py-1 text-[10px] font-semibold rounded-full ${getStatusColor(currentGame.status)}`}>
                           {currentGame.status}
                         </div>
@@ -2167,7 +2167,7 @@ function App() {
                     <div className="sm:hidden mt-4 flex gap-2 overflow-x-auto pb-1">
                       {gameLibrary.map((game, i) => (
                         <button key={game.id} onClick={() => goToGame(i)}
-                          className={`flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border transition-all ${
+                          className={`shrink-0 w-10 h-10 rounded-lg overflow-hidden border transition-all ${
                             currentGameIndex === i ? 'border-white/40 scale-110' : 'border-white/10 opacity-50'
                           }`}>
                           <img src={game.cover} alt={game.title} className="w-full h-full object-cover" />
