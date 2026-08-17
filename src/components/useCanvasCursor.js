@@ -3,11 +3,23 @@ import { useEffect } from 'react';
 
 const useCanvasCursor = () => {
   useEffect(() => {
+    // Twenty trails of fifty nodes are re-integrated and re-stroked every frame,
+    // which is the most expensive thing on the page. Skip it outright for anyone
+    // who has asked for less motion — Oneko already does the same.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     let ctx;
     let f;
     let pos = {};
     let lines = [];
     let running = true;
+    // The trail converges on the pointer within a few hundred ms of it stopping,
+    // after which every further frame redraws an identical picture. Park the loop
+    // once the pointer goes quiet and let the next move restart it; nothing looks
+    // different, the CPU just stops burning on a static image.
+    let looping = false;
+    let lastMove = 0;
+    const IDLE_MS = 900;
 
     const E = {
       friction: 0.5,
@@ -68,30 +80,49 @@ const useCanvasCursor = () => {
     }
 
     function handleMove(e) {
-  pos.x = e.touches ? e.touches[0].pageX : e.clientX;
-  pos.y = e.touches ? e.touches[0].pageY : e.clientY;
-  
-  // Removed preventDefault to stop the warning
-  // if (e.preventDefault) e.preventDefault();
-}
+      pos.x = e.touches ? e.touches[0].pageX : e.clientX;
+      pos.y = e.touches ? e.touches[0].pageY : e.clientY;
+      lastMove = performance.now();
+      if (!looping) { looping = true; requestAnimationFrame(render); }
+    }
 
     function onMousemove(e) {
       document.removeEventListener('mousemove', onMousemove);
       document.addEventListener('touchstart', onMousemove, { passive: true });
       document.addEventListener('mousemove', handleMove);
       document.addEventListener('touchmove', handleMove, { passive: true });
-      handleMove(e); initLines(); render();
+      handleMove(e); initLines(); startLoop();
+    }
+
+    // Every node still carrying meaningful velocity means the trail is mid-swing.
+    // Checked before parking so the loop can only stop on a settled picture — on
+    // a throttled or low-power frame rate an elapsed-time check alone would freeze
+    // a half-drawn squiggle on screen.
+    function isSettled() {
+      for (let i = 0; i < lines.length; i++) {
+        const nodes = lines[i].nodes;
+        for (let j = 0; j < nodes.length; j++) {
+          if (Math.abs(nodes[j].vx) > 0.05 || Math.abs(nodes[j].vy) > 0.05) return false;
+        }
+      }
+      return true;
     }
 
     function render() {
-      if (!running || !ctx) return;
+      if (!running || !ctx) { looping = false; return; }
       ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = 'hsla(' + Math.round(f.update()) + ',90%,70%,0.55)';
       ctx.lineWidth = 2;
       for (let i = 0; i < lines.length; i++) { lines[i].update(); lines[i].draw(); }
+      if (performance.now() - lastMove > IDLE_MS && isSettled()) { looping = false; return; }
       requestAnimationFrame(render);
+    }
+
+    function startLoop() {
+      lastMove = performance.now();
+      if (!looping) { looping = true; requestAnimationFrame(render); }
     }
 
     function resizeCanvas() {

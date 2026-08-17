@@ -22,8 +22,12 @@ export const Particles = ({
       context.current = canvasRef.current.getContext("2d");
     }
     initCanvas();
-    animate();
     window.addEventListener("resize", initCanvas);
+
+    // Draw the field once but leave it still for anyone who has asked for less
+    // motion, rather than running the drift loop at them.
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!still) animate();
 
     return () => {
       window.removeEventListener("resize", initCanvas);
