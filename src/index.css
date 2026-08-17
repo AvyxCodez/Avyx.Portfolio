@@ -2,45 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-.snap-container {
-  overflow: hidden;
-  height: 100dvh;
-  font-family: 'Geist', system-ui, -apple-system, sans-serif;
-  scrollbar-width: none;
-}
+/* These live in the components layer so Tailwind's utilities still win over
+   them, which is what the CDN build did implicitly: it injected its stylesheet
+   after this file, so a utility in the markup always beat a rule here. Compiled
+   at build time the utilities move to the top of this file instead, and without
+   a layer the rules below would start overriding the markup — .snap-container
+   would take overflow:hidden away from its own overflow-y-scroll class. */
+@layer components {
+  .snap-container {
+    overflow: hidden;
+    height: 100dvh;
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    scrollbar-width: none;
+  }
 
-.snap-container::-webkit-scrollbar {
-  display: none;
-}
+  .snap-container::-webkit-scrollbar {
+    display: none;
+  }
 
-.snap-section {
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .snap-section {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-/* A section whose content can outgrow the locked viewport height scrolls inside
-   itself instead of being clipped. Centering has to move to auto margins on the
-   child (see .snap-section--scroll > *): `justify-content: center` clips the
-   overflowing top edge and leaves it permanently unreachable, since the outer
-   container is overflow:hidden and the wheel handler moves whole sections.
-   Declared after .snap-section so it wins on source order at equal specificity,
-   rather than depending on where Tailwind's CDN styles land relative to this. */
-.snap-section--scroll {
-  justify-content: flex-start;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
+  /* A section whose content can outgrow the locked viewport height scrolls inside
+     itself instead of being clipped. Centering has to move to auto margins on the
+     child (see .snap-section--scroll > *): `justify-content: center` clips the
+     overflowing top edge and leaves it permanently unreachable, since the outer
+     container is overflow:hidden and the wheel handler moves whole sections.
+     Declared after .snap-section so it wins on source order at equal specificity
+     — both sit in this same layer, so that ordering still holds. */
+  .snap-section--scroll {
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
 
-.snap-section--scroll > * {
-  margin-top: auto;
-  margin-bottom: auto;
-}
+  .snap-section--scroll > * {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 
-.snap-section--scroll::-webkit-scrollbar {
-  display: none;
+  .snap-section--scroll::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {
