@@ -1178,7 +1178,6 @@ function App() {
           font-family: 'SiteFont', 'Geist', system-ui, -apple-system, sans-serif;
         }
 
-        /* Social icons — plain white glyphs with an always-on glow */
         .social-ico { transition: color .2s ease, transform .2s ease, filter .2s ease; filter: drop-shadow(0 0 7px rgba(255,255,255,0.5)); }
         .social-ico:hover { color:#fff; transform: translateY(-2px); filter: drop-shadow(0 0 14px rgba(255,255,255,0.85)); }
 
