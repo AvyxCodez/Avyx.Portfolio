@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { LazyMotion } from 'motion/react'
 import { Analytics } from '@vercel/analytics/react'
@@ -26,7 +26,7 @@ function typeTitle() {
 
   document.title = currentText || ",";
 
-  let typeSpeed = isDeleting ? 120 : 220;   // â† Slower typing & deleting
+  let typeSpeed = isDeleting ? 120 : 220;   // ← Slower typing & deleting
 
   if (!isDeleting && currentText === fullText) {
     typeSpeed = 2200; // Pause longer when fully typed

@@ -1,14 +1,14 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { m, AnimatePresence } from 'motion/react';
 
-// Local dev has no serverless functions â€” fall back to localStorage
+// Local dev has no serverless functions — fall back to localStorage
 const IS_DEV = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const DEV_KEY = 'avyx-comments';
 const devRead = () => { try { return JSON.parse(localStorage.getItem(DEV_KEY) || '[]'); } catch { return []; } };
 const devWrite = (list) => localStorage.setItem(DEV_KEY, JSON.stringify(list));
 
 // The site-wide display face (SiteFont) is decorative and hurts readability at
-// comment sizes â€” keep this panel on a plain sans stack.
+// comment sizes — keep this panel on a plain sans stack.
 const BODY_FONT = "'Geist', system-ui, -apple-system, sans-serif";
 
 const formatDate = (ts) => {
@@ -49,7 +49,7 @@ export default function Comments() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
 
-  // Moderation â€” unlocked by triple-clicking the note counter in the header
+  // Moderation — unlocked by triple-clicking the note counter in the header
   const [adminKey, setAdminKey] = useState(() => localStorage.getItem('avyx-admin-key') || '');
   const modClicks = useRef({ n: 0, t: 0 });
 
@@ -88,7 +88,7 @@ export default function Comments() {
       if (r.status === 401) {
         localStorage.removeItem('avyx-admin-key');
         setAdminKey('');
-        setError('Wrong admin key â€” moderation locked again.');
+        setError('Wrong admin key — moderation locked again.');
         setShowForm(true);
         return;
       }
@@ -158,7 +158,7 @@ export default function Comments() {
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-10 blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
 
-      {/* Drag handle â€” mobile only */}
+      {/* Drag handle — mobile only */}
       {isMobile && (
         <div className="flex justify-center pt-4 pb-2">
           <div className="w-9 h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
@@ -175,7 +175,7 @@ export default function Comments() {
           <div>
             <p className="text-sm font-semibold text-white leading-none">Comments</p>
             <p onClick={handleModTap} className="text-[10px] font-mono mt-0.5 select-none" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              {comments.length} {comments.length === 1 ? 'note' : 'notes'}{adminKey ? ' Â· mod' : ''}
+              {comments.length} {comments.length === 1 ? 'note' : 'notes'}{adminKey ? ' · mod' : ''}
             </p>
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function Comments() {
                 <button type="submit" disabled={submitting}
                   className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
                   style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
-                  {submitting ? 'Postingâ€¦' : 'Post â†’'}
+                  {submitting ? 'Posting…' : 'Post →'}
                 </button>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function Comments() {
         )}
       </div>
 
-      {/* Bottom safe area â€” mobile */}
+      {/* Bottom safe area — mobile */}
       {isMobile && <div className="h-6" />}
     </div>
   );

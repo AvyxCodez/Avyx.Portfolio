@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // `m` is the tree-shakeable component: it ships no features of its own, and the
 // LazyMotion provider in main.jsx supplies them once for the whole tree.
 // Importing `motion` instead pulls in every feature Motion has, used or not.
@@ -140,7 +140,7 @@ const IS_DEV = window.location.hostname === "localhost" || window.location.hostn
 const fadeTexts = ["Welcome", "Open to work"];
 
 // Letters lift and sharpen one after another instead of the word fading in as
-// a block â€” a stagger reads as deliberate where a crossfade reads as flicker.
+// a block — a stagger reads as deliberate where a crossfade reads as flicker.
 const FADE_LETTER = {
   out: { opacity: 0, y: 14, filter: 'blur(8px)' },
   in: { opacity: 1, y: 0, filter: 'blur(0px)' },
@@ -153,7 +153,7 @@ const FADE_WORD = {
 };
 
 const songs = [
-  // lrcTitle/lrcArtist override the display metadata when looking lyrics up â€”
+  // lrcTitle/lrcArtist override the display metadata when looking lyrics up —
   // LRCLIB indexes canonical track titles and a single primary artist.
   {
     id: 1,
@@ -207,7 +207,7 @@ const projects = [
     id: 1,
     title: 'Lumora',
     tagline: 'A cozy little home for your files.',
-    description: 'Drop a file, get a link â€” that\'s the whole thing. Instant file sharing with no account required, optional self-destructing uploads, and zero ads or tracking.',
+    description: 'Drop a file, get a link — that\'s the whole thing. Instant file sharing with no account required, optional self-destructing uploads, and zero ads or tracking.',
     tags: ['File Sharing', 'No Signup', '200MB Limit', 'Self-Destruct Uploads'],
     stack: ['Next.js', 'TypeScript', 'Node.js'],
     url: 'https://lumora-io.vercel.app/',
@@ -300,7 +300,7 @@ const BADGE_FLAGS = [
   { flag: 4194304, icon: 'active-developer',         label: 'Active Developer' },
 ];
 
-// Visitor's own timezone â€” used for the location badge and clock delta
+// Visitor's own timezone — used for the location badge and clock delta
 const visitorTimeZone = (() => {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; }
 })();
@@ -308,7 +308,7 @@ const visitorCity = visitorTimeZone.includes('/')
   ? visitorTimeZone.split('/').pop().replace(/_/g, ' ')
   : (visitorTimeZone || 'Local time');
 const formatGmt = (offMin) => {
-  const sign = offMin >= 0 ? '+' : 'âˆ’';
+  const sign = offMin >= 0 ? '+' : '−';
   const abs = Math.abs(offMin);
   const h = Math.floor(abs / 60);
   const m = abs % 60;
@@ -316,7 +316,7 @@ const formatGmt = (offMin) => {
 };
 
 // Parse an LRC blob into sorted {time, text} lines. A single line may carry
-// several timestamps (`[00:12.00][01:30.00]same words`) â€” emit one entry each.
+// several timestamps (`[00:12.00][01:30.00]same words`) — emit one entry each.
 const LRC_STAMP = /\[(\d+):(\d+(?:\.\d+)?)\]/g;
 const parseLrc = (raw) => {
   const out = [];
@@ -350,14 +350,14 @@ function App() {
   const [showGameLibrary, setShowGameLibrary] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // Preloader â€” real asset load gated with a minimum duration so it never just flashes
+  // Preloader — real asset load gated with a minimum duration so it never just flashes
   const [siteLoading, setSiteLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
-    // A still background can be waited on outright. A video can't â€” it streams,
+    // A still background can be waited on outright. A video can't — it streams,
     // so gating the preloader on it would hold the site behind the whole file.
     const bgPromise = SITE_CONFIG.bgType === 'video'
       ? Promise.resolve()
@@ -563,7 +563,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.5);
 
-  // Lyrics â€” 'loading' | 'ok' | 'none' (track has no synced lyrics) | 'error'
+  // Lyrics — 'loading' | 'ok' | 'none' (track has no synced lyrics) | 'error'
   // (couldn't reach LRCLIB). Keeping those last two apart matters: they used to
   // render the same message, which made an outage look like a missing track.
   const [lyrics, setLyrics] = useState([]);
@@ -588,7 +588,7 @@ function App() {
     // Both environments hit the same URL: a Vercel function in prod, a Vite dev proxy locally.
     const call = async (params) => {
       const res = await fetch(`/api/lrclib?${new URLSearchParams(params)}`);
-      if (res.status === 404) return null;        // no match â€” not a failure
+      if (res.status === 404) return null;        // no match — not a failure
       if (!res.ok) throw new Error(`lyrics ${res.status}`);
       return res.json();
     };
@@ -598,7 +598,7 @@ function App() {
       const artist = song.lrcArtist || song.artist;
 
       try {
-        // Exact lookup first â€” cheapest, and precise when the metadata lines up.
+        // Exact lookup first — cheapest, and precise when the metadata lines up.
         // (No duration hint: this runs the moment the track changes, before the
         // audio element has loaded metadata for it.)
         let hit = await call({ endpoint: 'get', artist_name: artist, track_name: track });
@@ -689,7 +689,7 @@ function App() {
       if (!heightChanged) return;
 
       // Sections are stacked at fixed pixel heights, so once those change the
-      // scroll offset that pointed at the current one lands between two â€” a
+      // scroll offset that pointed at the current one lands between two — a
       // phone rotation would leave the visitor looking at half of each page.
       // Realign on whichever section is meant to be showing, and abandon any
       // transition still running, since it was aiming at the old geometry.
@@ -711,7 +711,7 @@ function App() {
     const startTime = performance.now();
     const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const step = (now) => {
-      if (scrollAnimRef.current !== token) return;   // superseded â€” stop animating
+      if (scrollAnimRef.current !== token) return;   // superseded — stop animating
       const progress = Math.min((now - startTime) / duration, 1);
       container.scrollTop = startY + diff * ease(progress);
       if (progress < 1) requestAnimationFrame(step);
@@ -734,7 +734,7 @@ function App() {
   };
 
   // True while the section still has room to scroll the way the visitor is
-  // going â€” the page should only advance once they've reached that edge.
+  // going — the page should only advance once they've reached that edge.
   const canScrollWithin = (dir) => {
     const s = scrollableSection();
     if (!s) return false;
@@ -878,7 +878,7 @@ function App() {
     video.muted = isPlaying;
   }, [isPlaying, showEnter]);
 
-  // Web Audio graph for the visualizer â€” created once, on the first user gesture
+  // Web Audio graph for the visualizer — created once, on the first user gesture
   const ensureAnalyser = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -898,7 +898,7 @@ function App() {
         vizDataRef.current = new Uint8Array(analyser.frequencyBinCount);
       }
       if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
-    } catch { /* tainted/unsupported â€” audio still plays, visualizer stays flat */ }
+    } catch { /* tainted/unsupported — audio still plays, visualizer stays flat */ }
   };
 
   const togglePlay = () => {
@@ -908,7 +908,7 @@ function App() {
     else audio.pause();
   };
 
-  // Visualizer draw loop â€” real frequency bars while the music section is on screen
+  // Visualizer draw loop — real frequency bars while the music section is on screen
   useEffect(() => {
     if (!musicVisible) { cancelAnimationFrame(vizRafRef.current); return; }
     const draw = () => {
@@ -960,7 +960,7 @@ function App() {
     }, 80);
   };
 
-  // â”€â”€ Media Session â€” lock-screen / Bluetooth / notification controls â”€â”€
+  // ── Media Session — lock-screen / Bluetooth / notification controls ──
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
     const ms = navigator.mediaSession;
@@ -1001,7 +1001,7 @@ function App() {
   const [activityAppIcon, setActivityAppIcon] = useState(null);
   const [spotify, setSpotify] = useState(null);
 
-  // Live Discord presence via Lanyard's WebSocket â€” status/avatar/badges update in real time
+  // Live Discord presence via Lanyard's WebSocket — status/avatar/badges update in real time
   useEffect(() => {
     let ws, heartbeat, reconnect, closed = false;
 
@@ -1030,14 +1030,14 @@ function App() {
         let msg;
         try { msg = JSON.parse(e.data); } catch { return; }
         if (msg.op === 1) {
-          // Hello â€” subscribe to our user, then heartbeat on the given interval
+          // Hello — subscribe to our user, then heartbeat on the given interval
           ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_USER_ID } }));
           clearInterval(heartbeat);
           heartbeat = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
           }, msg.d?.heartbeat_interval || 30000);
         } else if (msg.op === 0) {
-          // Event â€” INIT_STATE / PRESENCE_UPDATE (d is the presence, or keyed by id)
+          // Event — INIT_STATE / PRESENCE_UPDATE (d is the presence, or keyed by id)
           const d = msg.d;
           applyPresence(d && d.discord_status ? d : (d ? d[DISCORD_USER_ID] : null));
         }
@@ -1107,7 +1107,7 @@ function App() {
   const localDateStr = clockTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const localGmt = formatGmt(-clockTime.getTimezoneOffset());
 
-  // Current Discord activity (game/app rich presence) â€” skips custom status + Spotify
+  // Current Discord activity (game/app rich presence) — skips custom status + Spotify
   const primaryActivity = discordActivities.find((a) => a.type !== 4 && a.name !== 'Spotify') || null;
   const customStatus = discordActivities.find((a) => a.type === 4) || null;
   const activityAsset = (img, appId) => {
@@ -1116,7 +1116,7 @@ function App() {
     return `https://cdn.discordapp.com/app-assets/${appId}/${img}.png`;
   };
   const activityImg = primaryActivity ? activityAsset(primaryActivity.assets?.large_image, primaryActivity.application_id) : null;
-  // Rich-presence buttons â€” labels from `buttons`, URLs from `metadata.button_urls` (http(s) only)
+  // Rich-presence buttons — labels from `buttons`, URLs from `metadata.button_urls` (http(s) only)
   const activityButtons = (primaryActivity?.buttons || []).map((label, i) => {
     const url = primaryActivity?.metadata?.button_urls?.[i];
     return { label: String(label).slice(0, 32), url: typeof url === 'string' && /^https?:\/\//i.test(url) ? url : null };
@@ -1136,7 +1136,7 @@ function App() {
     const elapsed = Math.min(Math.max(clockTime.getTime() - start, 0), total);
     return { pct: (elapsed / total) * 100, elapsed: elapsed / 1000, total: total / 1000 };
   })();
-  // Lanyard joins multiple artists with semicolons â€” read better as a comma list.
+  // Lanyard joins multiple artists with semicolons — read better as a comma list.
   const spotifyArtist = spotify?.artist?.replace(/;\s*/g, ', ') || '';
 
   // When an activity has no rich-presence image, fall back to the Discord app's own icon
@@ -1257,14 +1257,14 @@ function App() {
       <Comments />
       {!showEnter && <Oneko />}
 
-      {/* Game library launcher â€” floating icon next to the chat button */}
+      {/* Game library launcher — floating icon next to the chat button */}
       <button onClick={() => setShowGameLibrary(true)} title="Game collection"
         className="fixed top-4 right-16 z-[80] w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-125"
         style={{ color: '#fff', textShadow: '0 0 12px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.4)', background: 'none', border: 'none' }}>
         <i className="fa-solid fa-gamepad text-xl" />
       </button>
 
-      {/* VOLUME â€” hidden on iOS (volume is hardware-only on iOS Safari) */}
+      {/* VOLUME — hidden on iOS (volume is hardware-only on iOS Safari) */}
       <div
         className={`fixed top-4 left-4 z-[80] flex items-center transition-opacity duration-300 ${activeSection === 3 || /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         onMouseEnter={() => setShowVolumeSlider(true)}
@@ -1283,7 +1283,7 @@ function App() {
         <div className={`overflow-hidden transition-all duration-300 ease-out ${
           showVolumeSlider || volumeDragging ? 'w-28 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0'
         }`}>
-          {/* Capsule with no thumb, thickening while dragged â€” the iOS shape */}
+          {/* Capsule with no thumb, thickening while dragged — the iOS shape */}
           <div className={`relative rounded-full transition-all duration-150 ${volumeDragging ? 'h-3' : 'h-2'}`}
             style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.18)' }}>
             <div className="absolute left-0 top-0 h-full rounded-full bg-white pointer-events-none"
@@ -1303,13 +1303,13 @@ function App() {
       <div className={`fixed bottom-4 left-4 z-[70] flex items-center gap-2.5 text-sm text-white/80 transition-all duration-300 ${activeSection === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="group relative flex items-center gap-1.5 cursor-default">
           <i className="fa-solid fa-eye text-xs"></i>
-          <span className="font-mono tabular-nums">{views === null ? "â€”" : displayViews.toLocaleString()}</span>
+          <span className="font-mono tabular-nums">{views === null ? "—" : displayViews.toLocaleString()}</span>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-0.5 rounded-md text-xs text-white bg-black/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
             Views
           </div>
         </div>
         
-        <span className="text-white/40">â€¢</span>
+        <span className="text-white/40">•</span>
         
         <div className="group relative flex items-center gap-1 cursor-default">
           <i className="fa-solid fa-location-dot text-xs"></i>
@@ -1339,19 +1339,19 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Click to Enter â€” splits open like two panels (top slides up, bottom slides down) */}
+      {/* Click to Enter — splits open like two panels (top slides up, bottom slides down) */}
       <AnimatePresence>
         {!siteLoading && showEnter && (
           <m.div key="enter" onClick={enterSite}
             className="group fixed inset-0 z-[90] cursor-none overflow-hidden">
 
-            {/* Top panel â€” slides up */}
+            {/* Top panel — slides up */}
             <m.div
               exit={{ y: '-101%' }}
               transition={{ duration: 0.85, ease: [0.83, 0, 0.17, 1] }}
               className="absolute top-0 inset-x-0 h-1/2 bg-black" />
 
-            {/* Bottom panel â€” slides down */}
+            {/* Bottom panel — slides down */}
             <m.div
               exit={{ y: '101%' }}
               transition={{ duration: 0.85, ease: [0.83, 0, 0.17, 1] }}
@@ -1365,7 +1365,7 @@ function App() {
               className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px pointer-events-none"
               style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)' }} />
 
-            {/* Content â€” fades out as the panels open */}
+            {/* Content — fades out as the panels open */}
             <m.div
               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, transition: { duration: 0.2 } }}
@@ -1413,7 +1413,7 @@ function App() {
             onMouseLeave={handleMouseLeave}
             style={{ transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
           >
-            {/* Boxless â€” content floats directly on the scene */}
+            {/* Boxless — content floats directly on the scene */}
             <div className="relative">
               <div className="relative z-10 p-6 sm:p-8">
 
@@ -1495,7 +1495,7 @@ function App() {
                   </span>
                 </div>
 
-                {/* Cycling text â€” letters stagger in, then the whole word peels away */}
+                {/* Cycling text — letters stagger in, then the whole word peels away */}
                 <div className="relative h-6 mb-5 sm:mb-6">
                   <AnimatePresence mode="wait">
                     <m.span key={currentFadeIndex}
@@ -1506,8 +1506,8 @@ function App() {
                         <m.span key={i} variants={FADE_LETTER}
                           transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                           className="inline-block">
-                          {/* A bare space collapses inside a flex row â€” hold it open */}
-                          {ch === ' ' ? 'Â ' : ch}
+                          {/* A bare space collapses inside a flex row — hold it open */}
+                          {ch === ' ' ? ' ' : ch}
                         </m.span>
                       ))}
                     </m.span>
@@ -1547,11 +1547,11 @@ function App() {
             </div>
           </div>
 
-          {/* World clock â€” my time + visitor delta */}
+          {/* World clock — my time + visitor delta */}
           <div className={`w-full max-w-[330px] sm:max-w-[400px] mt-4 transition-all duration-700 delay-200 ease-out ${showProfile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="flex items-center justify-center gap-4 px-4 py-3.5">
 
-              {/* Analog face â€” visitor's local time */}
+              {/* Analog face — visitor's local time */}
               <div className="relative w-14 h-14 shrink-0 rounded-full"
                 style={{
                   background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1), rgba(8,12,24,0.95) 72%)',
@@ -1559,7 +1559,7 @@ function App() {
                   boxShadow: 'inset 0 0 10px rgba(0,0,0,0.65), 0 2px 10px rgba(0,0,0,0.45)',
                 }}>
 
-                {/* Hour ticks (skip the cardinal points â€” numerals live there) */}
+                {/* Hour ticks (skip the cardinal points — numerals live there) */}
                 {Array.from({ length: 12 }).map((_, i) => (
                   i % 3 !== 0 && (
                     <span key={i} className="absolute left-1/2 top-1/2 w-px h-[3px] rounded-full"
@@ -1584,7 +1584,7 @@ function App() {
                 {/* Minute hand */}
                 <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[19px] bg-white/70 rounded-full"
                   style={{ transformOrigin: '50% 100%', transform: `translate(-50%, -100%) rotate(${localM * 6 + localS * 0.1}deg)`, boxShadow: '0 0 3px rgba(0,0,0,0.6)' }} />
-                {/* Second hand â€” with counterweight tail */}
+                {/* Second hand — with counterweight tail */}
                 <span className="absolute left-1/2 top-1/2 w-px h-[26px] rounded-full"
                   style={{ background: ACCENT, transformOrigin: '50% 77%', transform: `translate(-50%, -77%) rotate(${localS * 6}deg)`, boxShadow: `0 0 4px ${ACCENT}88` }} />
                 {/* Center cap */}
@@ -1597,7 +1597,7 @@ function App() {
                   <i className="fa-regular fa-clock text-[9px]" /> {visitorTimeZone || 'Local time'}
                 </p>
                 <p className="font-mono text-lg sm:text-xl font-semibold text-white tabular-nums leading-tight">{localTimeStr}</p>
-                <p className="font-mono text-[11px] text-white/40">{localDateStr} Â· {localGmt}</p>
+                <p className="font-mono text-[11px] text-white/40">{localDateStr} · {localGmt}</p>
               </div>
             </div>
           </div>
@@ -1616,7 +1616,7 @@ function App() {
           </button>
         </div>
 
-        {/* PAGE 2 â€” About Me (bio pill + profile/timezone cards + skill tags) */}
+        {/* PAGE 2 — About Me (bio pill + profile/timezone cards + skill tags) */}
         <div ref={aboutRef} className="snap-section snap-section--scroll min-h-screen flex flex-col px-4 sm:px-6 py-10 border-t border-white/[0.06]">
           <div className="max-w-[720px] w-full mx-auto">
 
@@ -1723,7 +1723,7 @@ function App() {
               </div>
             )}
 
-            {/* Spotify â€” live "now listening", straight from Lanyard */}
+            {/* Spotify — live "now listening", straight from Lanyard */}
             {spotify && (
               <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 <button
@@ -1786,7 +1786,7 @@ function App() {
               My Projects
             </h2>
 
-            {/* Project cards â€” banner style */}
+            {/* Project cards — banner style */}
             <div className="space-y-4">
               {projects.map((project, i) => (
                 <button key={project.id}
@@ -1818,7 +1818,7 @@ function App() {
                   {/* Bottom scrim for legibility */}
                   <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(6,7,10,0.96) 8%, rgba(6,7,10,0.55) 46%, transparent)' }} />
 
-                  {/* Tech stack â€” top */}
+                  {/* Tech stack — top */}
                   <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2">
                     {(project.stack || []).map((tech) => {
                       const m = skillMeta[tech] || { icon: 'fa-solid fa-code', color: '#ffffff' };
@@ -1857,10 +1857,10 @@ function App() {
         {/* PAGE 4 - Music Player */}
         <div ref={musicRef} className="snap-section relative border-t border-white/10" style={{ height: '100dvh' }}>
 
-          {/* â”€â”€ Inner wrapper â”€â”€ */}
+          {/* ── Inner wrapper ── */}
           <div className="absolute inset-3 lg:inset-5">
 
-          {/* â”€â”€ Content â€” compact iOS-style player card â”€â”€ */}
+          {/* ── Content — compact iOS-style player card ── */}
           <div className={`relative z-10 flex items-center justify-center h-full px-5 transition-opacity duration-700 ${musicVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="w-full max-w-[380px] max-h-full overflow-y-auto rounded-[2rem]"
               style={{
@@ -1880,7 +1880,7 @@ function App() {
                     className="w-full aspect-square rounded-2xl object-cover shadow-2xl" />
                 </AnimatePresence>
 
-                {/* Audio visualizer â€” live frequency bars */}
+                {/* Audio visualizer — live frequency bars */}
                 <canvas ref={vizCanvasRef} width={680} height={80} className="w-full h-10 mt-4" />
 
                 {/* Title + equalizer */}
@@ -1930,7 +1930,7 @@ function App() {
                   </button>
                 </div>
 
-                {/* Volume â€” hidden on iOS (hardware-only there) */}
+                {/* Volume — hidden on iOS (hardware-only there) */}
                 {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
                   <div className="flex items-center gap-3 mt-6">
                     <i className="fa-solid fa-volume-low text-white/40 text-xs" />
@@ -1968,10 +1968,10 @@ function App() {
                           WebkitMaskImage: 'linear-gradient(to bottom, transparent, white 12%, white 82%, transparent)',
                         }}>
                         {lyricsState === 'loading' ? (
-                          <p className="text-white/30 text-sm pt-12">Loading lyricsâ€¦</p>
+                          <p className="text-white/30 text-sm pt-12">Loading lyrics…</p>
                         ) : lyricsState === 'error' ? (
                           <div className="pt-12 flex flex-col items-center gap-2.5">
-                            <p className="text-white/30 text-sm">Couldnâ€™t reach the lyrics service</p>
+                            <p className="text-white/30 text-sm">Couldn’t reach the lyrics service</p>
                             <button onClick={() => setLyricsAttempt((n) => n + 1)}
                               className="px-3.5 py-1.5 rounded-full text-xs font-medium text-white/70 hover:text-white transition-all"
                               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -2040,7 +2040,7 @@ function App() {
               style={{ maxHeight: '88vh' }}
               onClick={e => e.stopPropagation()}
             >
-              {/* Ambient background â€” animated per game */}
+              {/* Ambient background — animated per game */}
               <AnimatePresence mode="sync">
                 <m.div
                   key={currentGame.id + '-bg'}
@@ -2060,7 +2060,7 @@ function App() {
               {/* Layout */}
               <div className="relative z-10 flex" style={{ minHeight: '480px', maxHeight: '88vh' }}>
 
-                {/* Sidebar â€” game list */}
+                {/* Sidebar — game list */}
                 <div className="hidden sm:flex flex-col w-56 shrink-0 border-r border-white/[0.07] overflow-y-auto">
                   <div className="px-4 pt-5 pb-3 border-b border-white/[0.06]">
                     <p className="font-mono text-[10px] tracking-[3px] text-white/30 uppercase">Collection</p>
@@ -2138,7 +2138,7 @@ function App() {
                         </div>
                         <button onClick={closeGameLibrary}
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-white/[0.1] hover:bg-white/[0.08] text-white/40 hover:text-white transition-all text-base leading-none">
-                          Ã—
+                          ×
                         </button>
                       </div>
 
@@ -2156,9 +2156,9 @@ function App() {
                           </h2>
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
                             <span className="font-mono text-[10px] text-white/30">{currentGame.year}</span>
-                            <span className="text-white/15 text-[10px]">Â·</span>
+                            <span className="text-white/15 text-[10px]">·</span>
                             <span className="font-mono text-[10px] text-white/30">{currentGame.genre}</span>
-                            <span className="text-white/15 text-[10px]">Â·</span>
+                            <span className="text-white/15 text-[10px]">·</span>
                             <span className="font-mono text-[10px] text-white/30">{currentGame.platform}</span>
                           </div>
                           <p className="text-white/55 text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">{currentGame.description}</p>
@@ -2210,7 +2210,7 @@ function App() {
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="text-sm text-white/50">Leaving Avyx</div>
-                <button onClick={cancelExternal} className="text-white/60 hover:text-white text-xl leading-none">Ã—</button>
+                <button onClick={cancelExternal} className="text-white/60 hover:text-white text-xl leading-none">×</button>
               </div>
 
               <div className="mb-5">
