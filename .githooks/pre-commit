@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits containing UTF-8 BOMs or Windows-1252 mojibake.
+# Enable in a fresh clone with:  git config core.hooksPath .githooks
+exec node scripts/check-encoding.mjs
