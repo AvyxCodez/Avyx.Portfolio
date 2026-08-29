@@ -135,6 +135,11 @@ const ACCENT = "#60a5fa";
 
 const SPOTIFY_GREEN = "#1DB954";
 
+// SiteFont is a display face: its bullet glyph is a dash and its capitals read
+// as ornamental. Fixed overlays sit outside .snap-container (which already sets
+// Geist), so they need the plain stack spelled out.
+const BODY_FONT = "'Geist', system-ui, -apple-system, sans-serif";
+
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 const fadeTexts = ["Welcome", "Open to work"];
@@ -1300,7 +1305,8 @@ function App() {
       </div>
 
       {/* VIEW COUNTER + LOCATION */}
-      <div className={`fixed bottom-4 left-4 z-[70] flex items-center gap-2.5 text-sm text-white/80 transition-all duration-300 ${activeSection === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div style={{ fontFamily: BODY_FONT }}
+        className={`fixed bottom-4 left-4 z-[70] flex items-center gap-2.5 text-sm text-white/80 transition-all duration-300 ${activeSection === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="group relative flex items-center gap-1.5 cursor-default">
           <i className="fa-solid fa-eye text-xs"></i>
           <span className="font-mono tabular-nums">{views === null ? "—" : displayViews.toLocaleString()}</span>
