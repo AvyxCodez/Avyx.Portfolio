@@ -207,6 +207,12 @@ const skillMeta = {
   'Next.js':      { icon: 'fa-brands fa-react',    color: '#ffffff' },
 };
 
+// WakaTime reports whatever languages you actually touched, so the palette has
+// to cover names skillMeta has never heard of — fall back to a fixed rotation
+// rather than leaving segments uncoloured.
+const LANG_FALLBACK = ['#60a5fa', '#a78bfa', '#f472b6', '#fbbf24', '#34d399'];
+const langColor = (name, i) => skillMeta[name]?.color || LANG_FALLBACK[i % LANG_FALLBACK.length];
+
 const projects = [
   {
     id: 1,
@@ -1006,6 +1012,19 @@ function App() {
   const [activityAppIcon, setActivityAppIcon] = useState(null);
   const [spotify, setSpotify] = useState(null);
 
+  // WakaTime coding stats. The route answers 501 until WAKATIME_API_KEY is set,
+  // and `vite dev` doesn't run the serverless functions at all, so anything
+  // other than a well-formed payload just leaves the card unrendered.
+  const [waka, setWaka] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/wakatime')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d && typeof d.total === 'string') setWaka(d); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // Live Discord presence via Lanyard's WebSocket — status/avatar/badges update in real time
   useEffect(() => {
     let ws, heartbeat, reconnect, closed = false;
@@ -1764,6 +1783,47 @@ function App() {
                       <span className="font-mono text-[10px] text-white/35 tabular-nums">{formatTime(spotifyProgress.total)}</span>
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* WakaTime — what I've actually been writing this week */}
+            {waka && (
+              <div className={`rounded-3xl bg-white/[0.03] border border-white/[0.07] p-5 mb-4 transition-all duration-700 delay-150 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5" style={{ color: `${ACCENT}cc` }}>
+                      <i className="fa-solid fa-code text-[11px]" /> Coding this week
+                    </p>
+                    <p className="text-white font-semibold text-[22px] leading-tight mt-1">{waka.total}</p>
+                    <p className="text-white/40 text-xs mt-0.5">
+                      {waka.dailyAverage} daily average
+                      {waka.editor && <span className="text-white/25"> · {waka.editor}</span>}
+                    </p>
+                  </div>
+                  {waka.stale && (
+                    <span className="flex-shrink-0 font-mono text-[9px] text-white/25 uppercase tracking-wider">updating…</span>
+                  )}
+                </div>
+
+                {waka.languages.length > 0 && (
+                  <>
+                    {/* Stacked share of time per language */}
+                    <div className="flex h-1.5 rounded-full overflow-hidden mt-4 bg-white/[0.06]">
+                      {waka.languages.map((l, i) => (
+                        <div key={l.name} style={{ width: `${l.percent}%`, background: langColor(l.name, i) }} />
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
+                      {waka.languages.map((l, i) => (
+                        <span key={l.name} className="inline-flex items-center gap-1.5 text-[11px] text-white/55">
+                          <span className="w-2 h-2 rounded-full" style={{ background: langColor(l.name, i) }} />
+                          {l.name}
+                          <span className="text-white/25 font-mono">{l.percent}%</span>
+                        </span>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
